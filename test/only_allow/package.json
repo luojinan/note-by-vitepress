@@ -1,0 +1,14 @@
+{
+  "name": "only_allow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node ./index.js",
+    "preinstall": "node ./index.js pnpm",
+    "pnpm:devPreinstall": "node ./index.js pnpm"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
