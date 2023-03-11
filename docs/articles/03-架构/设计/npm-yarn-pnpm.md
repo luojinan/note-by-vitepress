@@ -1,5 +1,8 @@
+# npm yarn pnpm
 
 ![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230309224003.png)
+
+> keys: `幽灵依赖`、`分身依赖`、`npm ci`、`lockfiles`、`hardlink`、`softlink`
 
 ## npm install 执行流程
 
@@ -102,7 +105,7 @@ node_modules
 
 ✨ **可以用来指向, 也可以把别的文件也定义成相同的** `inode`
 
-### 概念 hard/soft link
+### 概念 hard/link link
 `Linux` 中包括两种链接：
 1. 硬链接(`hard link`)
    - 创建多个空文件, 这些文件的 `inode` 等同于源文件 `inode`, 意味着只要源文件修改这些空文件也会同步修改，同理修改链接内容也会影响源文件以及其他所有链接
@@ -213,7 +216,7 @@ antfu 的 vitesse 需要通过包的锁文件去判断具体用到那个包管�
 
 不同的包管理器的 网络机制 缓存机制 下载后的依赖分布 不同，如果特别依赖这些的项目也需要注意一下
 
-主要是造成不同机器上同一项目的依赖版本不一致, 严重的是构建部署机安装的依赖和开发本地依赖不一致造成不可知的问题
+主要是造成不同机器上同一项目的依赖版本不一致, 严重的是构建部署机安装的依赖和开发本地依赖不一致造成不可知的线上问题
 
 ## 是否应该提交lockfiles到仓库？ 删除node_modules和lockfiles，重新install，是否有风险？
 
@@ -221,15 +224,14 @@ antfu 的 vitesse 需要通过包的锁文件去判断具体用到那个包管�
 -  `lockfiles` 用于保持依赖版本
 -  `lockfiles` 是依赖分析后的文件，有  `lockfiles` 就不用再做一次依赖分析，构建依赖树清单(扁平化), 提升一点速度
 
+`package.json` 中的依赖清单即使限制具体版本，嵌套依赖依然没办法限制, 还是会出现过一段时间后, 重新安装的依赖跟以前不同(嵌套依赖升级了)
+
 比对 `lockfiles` 和 `package.json` 的版本，一般都是落后于 `package.json` 才不一致(手动升级了某个依赖)
 
 此时会判断 `lockfiles` 落后的版本在 `package.json` 那里是否兼容，兼容的话不按package.json的新版本依赖来安装, 依然取 `lockfiles` (比对之后会相应的更新lock中的版本)
 
 👆 注意流程图中不同 npm 版本处理 lock 比对版本的处理不相同，因此不同电脑的 npm 应该尽量相同，避免 lock 比对过程，每个人安装的依赖版本不同(有些按照 lock 有些按照 package)
 
-假设没有 `lockfiles`, `package.json` 中的依赖清单版本需要限制具体版本, 才能避免安装出不同依赖的问题
-
-但是嵌套依赖则没办法限制, 还是会出现过一段时间后, 重新安装的依赖跟以前不同(嵌套依赖升级了)
 
 因此为了保证项目的长久稳定, 应该提交 lock 到仓库, 当需要升级某个依赖时, 更新 lock 及 `package.json` 提交
 
@@ -237,20 +239,69 @@ antfu 的 vitesse 需要通过包的锁文件去判断具体用到那个包管�
 
 或按照 lock 成功安装了依赖, 但是运行项目时依赖报错, 此时可能是该依赖版本不兼容这个 nodejs 环境, 此时可以整个项目考虑兼容这个 nodejs 环境去对这个依赖升级或是降级,并提交调整后的 `package.json` 和 lock, 考虑不兼容这个 nodejs 环境的话, 就让对方换成可以运行的 `nodejs` 版本
 
-## npm ci
+## 为什么 npm i 后lockfiles变了
 
-`clean install`
+首先需要明确的是，`npm i` 会先比对 `lockfiles` 内的版本是否符合 `package.json`
+如果符合的话是不会按照 `package.json` 自动更新依赖的
+
+而 `lockfiles` 不符合 `package.json` 版本的情况一般是 `package.json` 版本定义更高了
+
+> 因为 `package.json` 版本定义的是最低版本，一般情况下自动生成的 `lockfiles` 都不会低于 `package.json`
+
+手动改 `lockfiles` 的情况不多，手动改 `package.json` 反而会多点
+- 改低 `package.json` 的话， `lockfiles` 的依赖版本是符合的，此时安装会走 `lockfiles` 而不是 `package.json` 也就是想在已有 `lockfiles` 的情况下安装低版本依赖，需要删除 `lockfiles` 在安装
+- 改高 `package.json` 的话， `lockfiles` 的依赖版本不符合，此时会按照 `package.json` 的版本查找远程库的最高版本进行安装
+
+也许你会说手动改 `package.json` 的情况也不多呀，都是 `npm i xx` 升级版本的，会自动更新 `package.json` 和 `lockfiles`
+
+但是假如此时提交代码，只提交 `package.json`，丢弃 `lockfiles`，出现的结果就和手动改高 `package.json` 的情况一致了
+
+回到问题：为什么 `npm i` 后`lockfiles`变了
+
+因为 `lockfiles` 和 `package.json` 不符合，`npm` 自动查找不符合的依赖在 `package.json` 版本定义的远程库的最新版本
+
+为什么 `lockfiles` 和 `package.json` 不符合，就是有人 手动改了 `package.json` 或是 升级了依赖没有提交新的 `lockfiles`
+
+如何避免：👇
+- 只要升级依赖就同时提交 `package.json` 、 `lockfiles`
+- 理论上只要符合版本，都会走 `lockfiles` 不会出现不同的人本地依赖不一致问题，此时使用 `npm ci` 可以提升速度(只建议用于提升速度，而不是用于避免依赖走`package.json`)
+- 如果使用 `npm i` 安装出现 `lockfiles` 变化，应检查变化项，并提交此 `lockfile` 上锁，让正确的 `lockfile` 控制版本，而不是按照落后的 `lockfile` 来 `npm ci`
+
+## npm ci
 
 [npm文档](https://docs.npmjs.com/cli/v8/commands/npm-ci)
 
-I'm not 100% sure, but according to the docs (docs.npmjs.com/cli/v8/commands/npm-ci) one of the main features of npm ci is If dependencies in the package lock do not match those in package.json, npm ci will exit with an error, instead of updating the package lock.
+官方称这种安装是 `clean install`
 
-pnpm docs says In a CI environment, installation fails if a lockfile is present but needs an update.
-pnpm.io/cli/install
+> used in automated environments such as test platforms, continuous integration, and deployment
+> 
+> 常用于自动化环境：测试平台、持续集成、部署环境
 
-So, it looks like pnpm i behaves similar to npm ci. Try just pnpm i or pnpm install --frozen-lockfile
+> In short, the main differences between using npm install and npm ci are:
+> - The project must have an existing `package-lock.json` or `npm-shrinkwrap. json`.
+> - If dependencies in the package lock do not match those in `package.json`, `npm ci` will exit with an error, instead of updating the package lock.
+> - `npm ci` can only install entire projects at a time: individual dependencies cannot be added with this command.
+> - If a node_modules is already present, it will be automatically removed before `npm ci` begins its install.
+> - It will never write to `package.json` or any of the package-locks: installs are essentially frozen.
 
-Here is a good answer on [StackOverflow](https://stackoverflow.com/questions/70154568/pnpm-equivalent-command-for-npm-ci)
+如果仅仅从官方提供的区别来看：
+
+`npm ci` 也会先比对 `lockfiles` 内的版本是否符合 `package.json`
+- 不符合就中断安装
+- 符合就直接按照 `lockfiles` 安装依赖，不查询依赖远程库的版本是否更新
+
+`npm ci` 在安装前会自动清除现存的 `node_modules`，所以 `npm ci` 天然规避了增量安装可能带来的不一致性等问题。（这也意味着，你又可以少记一条命令 npm prune。）
+
+当想在已有 `node_modules` 情况下按照 `lockfiles` 安装依赖
+
+`npm ci` 意味着会重新安装所有依赖，速度可能会比 `npm i` 慢(从头从全局缓存解压或是网络下载)
+但是为了不出问题，大家按照 `lockfiles` 安装依赖都是手动删除 `node_modules` 的... 不敢直接安装，所以 `npm ci` 反而是符合习惯的...
+
+可以用 `--prefer-offline`，最大限度地利用 npm 的全局缓存加速安装过程
+
+> 注意：就像上面说的， `npm ci` 只建议用于提升速度，而不是用于避免依赖走`package.json`
+>
+> 当出现 `npm ci` 不符合而中断安装时，应检查修复 `lockfiles` 版本问题, 并使用 `npm i` 自动生成正确的 `lockfiles` (不要手动改)
 
 ## 迁移 npm to pnpm
 
@@ -287,7 +338,24 @@ Here is a good answer on [StackOverflow](https://stackoverflow.com/questions/701
 使用 only-allow 限制包管理器
 
 
-TODO: 过一遍 pnpm 英文文档
+TODO: 迁移笔记 + 过一遍 pnpm 英文文档
+
+
+## pnpm 使用 ci
+
+`pnpm` 没有 `ci` 指令
+
+我们上面了解了 `ci` 的作用：在持续集成等环境按照 `lockfiles` 安装依赖，并且不符合时中断安装
+
+[pnpm i 官网文档](https://pnpm.io/cli/install#--frozen-lockfile) 提到 `pnpm` 内置 [is-ci](https://www.npmjs.com/package/is-ci) 判断当前环境是 `ci` 环境会设置 `--frozen-lockfile` 为 `true`，该选项就是 ci 的效果
+
+> 就像上面反复强调的， `npm ci` 不是用于避免依赖走 `package.json`
+> 
+> 使用 `pnpm` 也不应该存在 `lockfiles` 内依赖不符合 `package.json` 的情况，不应该想着我要按照 `lockfiles` 安装依赖，要知道只要 `lockfiles` 符合 `package.json` 就不会自动更新依赖！
+
+而提升速度的作用，在 `pnpm` 下并不会太明显
+
+因此 `pnpm i` 足够了，不需要额外考虑
 
 ## 参考资料
 
