@@ -120,8 +120,6 @@ node_modules
 
 ![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230310134808.png)
 
-不扁平化
-
 `package.json`中的依赖清单显示在 `node_modules` 下, 还有1个 `node_modules/.npm/`目录树状存放所有依赖(包括嵌套的依赖)
 
 所有的依赖都是从全局 `store` 硬连接到了 `node_modules/.pnpm` 下，然后之间通过软链接来相互依赖。
@@ -134,6 +132,124 @@ node_modules
 ```
 
 外层的没有版本号
+
+[node_modules结构 - pnpm官方文档](https://pnpm.io/symlinked-node-modules-structure)
+
+扁平化所有嵌套依赖，同时保留2级树状结构👇
+
+Every file of every package inside `node_modules` is a hard link to the
+content-addressable store. Let's say you install `foo@1.0.0` that depends on
+`bar@1.0.0`. pnpm will hard link both packages to `node_modules` like this:
+
+```text
+node_modules
+└── .pnpm
+    ├── bar@1.0.0
+    │   └── node_modules
+    │       └── bar -> <store>/bar
+    │           ├── index.js
+    │           └── package.json
+    └── foo@1.0.0
+        └── node_modules
+            └── foo -> <store>/foo
+                ├── index.js
+                └── package.json
+```
+
+👆 `package.json` 中依赖了 foo，在 `node_modules/.npm/` 会把嵌套依赖也扁平化
+
+These are the only "real" files in `node_modules`. Once all the packages are
+hard linked to `node_modules`, symbolic links are created to build the nested
+dependency graph structure.
+
+As you might have noticed, both packages are hard linked into a subfolder inside
+a `node_modules` folder (`foo@1.0.0/node_modules/foo`). This is needed to:
+
+1. **allow packages to import themselves.** `foo` should be able to
+`require('foo/package.json')` or `import * as package from "foo/package.json"`.
+2. **avoid circular symlinks.** Dependencies of packages are placed in the same
+folder in which the dependent packages are. For Node.js it doesn't make a
+difference whether dependencies are inside the package's `node_modules` or in
+any other `node_modules` in the parent directories.
+
+👆 扁平化出来的依赖，内部多一层 `node_modules/.npm/foo/node_modules` 这里存放依赖包, 为了实现 引用自身 和 构建树状依赖关系
+
+The next stage of installation is symlinking dependencies. `bar` is going to be
+symlinked to the `foo@1.0.0/node_modules` folder: 👇
+
+```text
+node_modules
+└── .pnpm
+    ├── bar@1.0.0
+    │   └── node_modules
+    │       └── bar -> <store>/bar
+    └── foo@1.0.0
+        └── node_modules
+            ├── foo -> <store>/foo
+            └── bar -> ../../bar@1.0.0/node_modules/bar
+```
+
+👆 `foo` 依赖 `bar`, 在 `foo` 子级中生成软连接到 扁平化的 `bar`
+
+Next, direct dependencies are handled. `foo` is going to be symlinked into the
+root `node_modules` folder because `foo` is a dependency of the project: 👇
+
+```text
+node_modules
+├── foo -> ./.pnpm/foo@1.0.0/node_modules/foo
+└── .pnpm
+    ├── bar@1.0.0
+    │   └── node_modules
+    │       └── bar -> <store>/bar
+    └── foo@1.0.0
+        └── node_modules
+            ├── foo -> <store>/foo
+            └── bar -> ../../bar@1.0.0/node_modules/bar
+```
+
+👆 最终再把 `package.json` 直接依赖的包在外层 `node_modules` 创建软连接到 `/.pnpm`
+
+This is a very simple example. However, the layout will maintain this structure
+regardless of the number of dependencies and the depth of the dependency graph.
+
+Let's add `qar@2.0.0` as a dependency of `bar` and `foo`. This is how the new
+structure will look: 👇
+
+```text
+node_modules
+├── foo -> ./.pnpm/foo@1.0.0/node_modules/foo
+└── .pnpm
+    ├── bar@1.0.0
+    │   └── node_modules
+    │       ├── bar -> <store>/bar
+    │       └── qar -> ../../qar@2.0.0/node_modules/qar
+    ├── foo@1.0.0
+    │   └── node_modules
+    │       ├── foo -> <store>/foo
+    │       ├── bar -> ../../bar@1.0.0/node_modules/bar
+    │       └── qar -> ../../qar@2.0.0/node_modules/qar
+    └── qar@2.0.0
+        └── node_modules
+            └── qar -> <store>/qar
+```
+
+👆 而假设是 3级嵌套的依赖，会由`.npm/` 层的依赖构建关系，最终也只会由2级，而不会无限嵌套 ✨
+
+As you may see, even though the graph is deeper now (`foo > bar > qar`), the
+directory depth in the file system is still the same.
+
+This layout might look weird at first glance, but it is completely compatible
+with Node's module resolution algorithm! When resolving modules, Node ignores
+symlinks, so when `bar` is required from `foo@1.0.0/node_modules/foo/index.js`,
+Node does not use `bar` at `foo@1.0.0/node_modules/bar`, but instead, `bar` is
+resolved to its real location (`bar@1.0.0/node_modules/bar`). As a consequence,
+`bar` can also resolve its dependencies which are in `bar@1.0.0/node_modules`.
+
+👆 看起会有点混乱，但其实完全符合 `nodejs` , 且能很好的就解决 `幽灵依赖` 和 `利用全局缓存` 等问题
+
+A great bonus of this layout is that only packages that are really in the
+dependencies are accessible. With a flattened `node_modules` structure, all
+hoisted packages are accessible.
 
 ### pnpm install 安装过程
 
@@ -362,4 +478,5 @@ TODO: 迁移笔记 + 过一遍 pnpm 英文文档
 - [字节的一个小问题 npm 和 yarn不一样吗？](https://juejin.cn/post/7060844948316225572)
 - [pnpm 解决我哪些痛点？](https://juejin.cn/post/7036319707590295565)
 - [聊聊依赖管理 -  字节前端 ByteFE](https://mp.weixin.qq.com/s/9JCs3rCmVuGT3FvKxXMJwg)
-
+- [node_modules结构 - pnpm官方文档](https://pnpm.io/symlinked-node-modules-structure)
+- [pnpm 原理解析](https://github.com/lvqq/blog/issues/60)
