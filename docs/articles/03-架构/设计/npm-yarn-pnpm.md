@@ -431,7 +431,32 @@ antfu 的 vitesse 需要通过包的锁文件去判断具体用到那个包管�
 
 ![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230310150818.png)
 
-一些ts问题，为什么在pnpm环境下报错
+🤔 一些ts问题，为什么在pnpm环境下报错(npm环境不会)
+
+还是幽灵依赖的问题，`@types/node` 在npm 环境会被其他依赖安装到 `node_modules/@types` 下
+pnpm 则不会，因此需要手动提升到外部，这里虽然缺失的是 @types/node ，但是查看 tsconfig.ts 配置的 types 是 webpack-env
+
+而 webpack-env 是基于 @types/node 的，因为按照真实ts配置安装 webpack-env
+
+`tslib` 同理
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230314102459.png)
+vue2.7 ts报错
+升级 typescript `pnpm up typescript --lastest`
+
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230314114711.png)
+升级 husky `pnpm up husky --lastest`
+
+
+配置 preinstall 效果如下
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230318104521.png)
+
+npm6 有效
+npm 7+ 的 pre hook 在 install 后，一直未修复 issue
+
+
 
 但是启动项目报错 包缺失, 并不是因为 pnpm 安装不到包, 而是因为 npm 允许直接使用 package.json 中没有的依赖(幽灵依赖), 在 pnpm 的依赖目录结构中是不允许的, 因此即使pnpm安装全了依赖, 也会报错 包缺失
 

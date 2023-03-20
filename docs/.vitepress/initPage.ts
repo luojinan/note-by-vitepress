@@ -89,7 +89,7 @@ function getSideBarItemTreeData(
         // 当前为文件夹
         const dirData: SideBarItem = {
           text,
-          collapsed: false,
+          collapsed: true,
         }
         if (level !== maxLevel) {
           dirData.items = getSideBarItemTreeData(fileOrDirFullPath, level + 1, maxLevel, ignoreFileName, ignoreDirNames)
