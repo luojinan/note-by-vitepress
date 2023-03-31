@@ -27,3 +27,20 @@
     display: block;
   }
 } */
+
+/* 演讲模式(隐藏 header menu) */
+/* @media (min-width: 960px){
+  .VPSidebar {
+    display: none;
+  }
+  .VPContent.has-sidebar {
+    padding-left: 0 !important;
+  }
+}
+
+.VPNav {
+  display: none;
+}
+.aside {
+  order: unset !important;
+} */

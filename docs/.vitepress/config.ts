@@ -20,7 +20,7 @@ export default defineConfig({
     socialLinks: [
       {
         icon: "github",
-        link: 'https://gitee.com/luojinan1'
+        link: 'https://github.com/luojinan'
       }
     ],
     //   侧边导航
@@ -36,9 +36,9 @@ export default defineConfig({
     //   ],
     // },
     algolia: {
-      appId: '...',
-      apiKey: '...',
-      indexName: '...'
+      appId: 'JI6H0D3OC3',
+      apiKey: '8177b26e8ae81f186c520f237c3e27ed',
+      indexName: 'notepage_vitepress'
     },
     // 配置顶部的文字(不配置则是英文)
     outlineTitle: '文章目录',

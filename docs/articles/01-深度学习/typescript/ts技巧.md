@@ -327,6 +327,28 @@ function a<MyType>(arr: MyType[]): MyType | undefined {
 }
 ```
 
+
+```ts
+const foo = <T,>(x: T): T => x;
+
+const foo = <T extends {}>(x: T): T => x;
+
+const foo = <T extends Record<string, unknown>>(x: T): T => x;
+
+const foo: <T>(x: T) => T = x => x;
+
+const identity = <T,>(arg: T): T => {
+    console.log(arg);
+    return arg;
+};
+
+const renderAuthorize = <T>(Authorized: T): ((currentAuthority: CurrentAuthorityType) => T) => (
+    currentAuthority: CurrentAuthorityType,
+  ): T => {
+     return
+ };
+```
+
 **声明泛型的类型**(泛型默认为`any`)：
 1. 使用方自定义限制泛型类型
 2. 定义方限制泛型类型
@@ -340,6 +362,25 @@ function a<MyType>(arr: MyType[]): MyType | undefined {
 
 使用 `extends` 拓展(限制)泛型类型 ([不是给泛型的语法](#type-和-interface))
 
+## Promise 泛型
+
+返回 `Promise` 的工具函数, `resolve` 的数据类型需要通过泛型定义
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230323promisets.gif)
+
+👆 `res` 为 `unknow`
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230323promisets2.gif)
+
+使用方自定义 `Promise` 返回数据结构 泛型`<FnResult>`
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230323144759.png)
+
+定义方声明了 `Promise` 的返回类型是 `泛型T` 因此 TS 认为 `{data: ''}` 不符合泛型
+
+❌ 可以扩展泛型解决 TODO: 
+
+[TS Playground](https://www.typescriptlang.org/zh/play?jsx=0&ts=5.0.2#code/JYOwLgpgTgZghgYwgAgGIgEoQM4FcA2YyA3gFDLIAmcYcAXMtmFKAOakC+ppCA9iE2QwQyALzIAPABUAfAAoAlAwAKUXgFtg2CNJli9ZClAhhcUESAgB3ZKo1aIcucmPZe+AG4oF+kuQrIfAJErgzoWHiEYiRUNPTIAOSApcaAx8qAK-GAe2qAIW6ADqaAdsYJyFwBLjjuXnKuCv4c1VykwhLhOARg8goAdGAAFhAgTqXYyD6iekFu+BAd+LyslTgd1LQKCkA)
 
 ## 对象类型泛型
 
@@ -485,40 +526,119 @@ type Age2 = Person["age"];
 
 👇 用于 `数组枚举` 场景
 
-```js
-const APP = ['TaoBao', 'Tmall', 'Alipay'];
-```
-转为
 ```ts
-type app = 'TaoBao' | 'Tmall' | 'Alipay';
-```
-
-1. 使用 `as const` 将数据数组变为 `readonly` 的 **元组** 类型
-2. `APP` 是数据，因此要用 `typeof` 得到 `readonly ["TaoBao", "Tmall", "Alipay"]`
-3. `readonly ["TaoBao", "Tmall", "Alipay"]` 类型的 `[number]` 取出来就是 `"TaoBao" | "Tmall" | "Alipay"`
-```ts
-const APP = ['TaoBao', 'Tmall', 'Alipay'] as const;
+const APP = ['a', 'b', 'c'] as const;
+// 'a' | 'b' | 'c'
 type app = typeof APP[number];
-// type app = "TaoBao" | "Tmall" | "Alipay"
-
-function getPhoto(app: app) {}
-getPhoto('TaoBao'); // ok
-getPhoto('whatever'); // ❌ not ok
 ```
-👆 在编译时校验枚举，运行时不校验
 
-用枚举 `enum` 实现则会生成运行时代码
+## vue3 的 ts 拓展功能
 
-👇 数据转联合类型
+[vue3 ts](https://zhuanlan.zhihu.com/p/75922973)
+
+### readonly
+
+> 可以把每个属性都变成只读
+
 ```ts
-const CODE_MAP = {
-  A: '123',
-  B: '124',
-} as const;
-
-// '123' | '124'
-type code = typeof CODE_MAP[keyof typeof CODE_MAP]
+type A  = {a:number, b:string}
+type A1 = Readonly<A> // {readonly a: number;readonly b: string;}
 ```
 
-取 `value` 而不是取 `key` 因此要用 `数据[key]`
+👇 原理实现
+```ts
+type Readonly<T> = {
+  readonly [key in keyof T]: T[key];
+};
+```
 
+1. 定义一个支持泛型的类型别名, 传入类型参数T
+2. 通过keyof获取T上的键值集合 `'a' | 'b'`
+3. 用in表示循环keyof获取的键值
+4. 添加readonly标记
+
+```ts
+type A  = {a:number, b:string}
+type A1 = Partial<A> // { a?: number; b?: string;}
+
+type Partial<T> = {
+  [key in keyof T]?: T[key];
+};
+```
+Required\, 让属性都变成必选
+```ts
+type A  = {a?:number, b?:string}
+type A1 = Required<A> // { a: number; b: string;}
+
+type Required<T> = {
+  [key in keyof T]: T[key];
+};
+```
+Pick, 只保留自己选择的属性, U代表属性集合
+```ts
+type A  = {a:number, b:string}
+type A1 = Pick<A, 'a'> //  {a:number}
+
+type Pick<T, KEY extends keyof T> = {
+  [NewKey in KEY]: T[NewKey];
+};
+```
+Omit 实现排除已选的属性
+```ts
+type A  = {a:number, b:string}
+type A1 = Omit<A, 'a'> // {b:string}
+```
+Record, 创建一个类型,T代表键值的类型, U代表值的类型
+```ts
+type A1 = Record<string, string> // 等价{[k:string]:string}
+```
+Exclude, 过滤T中和U相同(或兼容)的类型
+```ts
+type A  = {a:number, b:string}
+type A1 = Exclude<number|string, string|number[]> // number
+
+// 兼容
+type A2 = Exclude<number|string, any|number[]> // never , 因为any兼容number, 所以number被过滤掉
+```
+Extract, 提取T中和U相同(或兼容)的类型
+```ts
+type A  = {a:number, b:string}
+type A1 = Extract<number|string, string|number[]> // string
+```
+
+
+```ts
+Record<string, string>
+// 等价于
+{[key: string]: string}
+
+// what about ?
+{ [key in string]: string }
+```
+```ts
+type T1 = {[key: string]: null}; // ✨ 数字作 key 被认为符合
+type T2 = {[key in string]: null}; // ✨ 数字不可作 key
+
+const t1: T1 = {'foo': null, 10: null};
+const t2: T2 = {'foo': null, 10: null};
+
+type S1 = keyof T1; // string | number
+type S2 = keyof T2; // string
+
+const s1: S1 = 10;
+const s2: S2 = 10; // error
+```
+
+```ts
+type T1 = {[key: string]: null};
+type T2 = {[key in string]: null};
+
+type T1opt = {[key: string]?: null}; // invalid syntax
+type T2opt = {[key in string]?: null};
+
+```
+
+```ts
+// This is "[key in string]" and not "[key: string]" to allow CSSObject to be self-referential
+```
+using in apparently allows for self-reference, as seen in [@types/styled-components/index.d.ts#24:](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/styled-components/index.d.ts#L24)

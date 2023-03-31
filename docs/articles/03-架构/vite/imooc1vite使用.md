@@ -18,6 +18,8 @@
 > 
 > 👆 重点在于使用 **原生ESM模块化**、**编译型语言工具Rust**
 
+[打包工具的思考](../%E8%AE%BE%E8%AE%A1/%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7%E7%9A%84%E6%80%9D%E8%80%83.md)
+
 ### 解决 Slow Server Start
 
 > Vite improves the dev server start time by first dividing the modules in an application into two categories: dependencies and source code.
