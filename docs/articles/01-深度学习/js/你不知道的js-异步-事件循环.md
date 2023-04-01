@@ -43,7 +43,7 @@ setTimeout
 */
 ```
 
-## JS单线程处理异步任务
+## JS单线程处理任务
 
 > 进程和线程的区别？为什么JS设计成单线程
 
@@ -99,7 +99,7 @@ setTimeout
 
 ![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/webcomponents.gif)
 
-👇 平时也能控制台的函数异常信息中看到执行栈的函数关系
+👇 平时也能在控制台的函数异常信息中看到执行栈的函数顺序
 
 ![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20221201204530.png)
 👆 报错在 `foo` 函数，`foo` 函数又是在 bar 函数中调用的
@@ -108,15 +108,13 @@ setTimeout
 
 ![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20221201204703.png)
 
-
-
-## 异步
+## 异步任务
 
 > `setTimeout 0` 并不是立即执行，可以看出JS处理异步是有一定顺序的
 
-js(执行代码)是单线程的，浏览器并不是单线程的，js执行一些 `webApi` ，交给浏览器，浏览器可以开启别的线程
-
-如 `setTimeout` 的 `webApi` 浏览器是在别的线程里倒计时
+> js(执行代码)是单线程的，浏览器并不是单线程的，js执行一些 `webApi` ，交给浏览器，浏览器可以开启别的线程
+> 
+> 如 `setTimeout` 的 `webApi` 浏览器是在别的线程里倒计时
 
 ```js
 function demo() {
@@ -160,18 +158,18 @@ setInterval(timer => {
 
 TODO: 通过该函数来实现 `setTimeout`
 
-
-![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/webcomponents1.gif)
-
-
-## 宏任务
+### 宏任务
 
 宏任务包括 `script` ， `setTimeout` `，setInterval` `，setImmediate` ，`I/O`，`UI` `rendering。`
 
 
-## 微任务
+### 微任务
 
-微任务包括 `process.nextTick` `，promise` ，`MutationObserver`
+微任务包括 `process.nextTick`，`promise` ，`MutationObserver`，`queueMicrotask`
+
+### queueMicrotask
+
+[queueMicrotask-MDN](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask)
 
 ## 浏览器的事件循环
 
@@ -183,11 +181,11 @@ JS 引擎线程，执行 JS 代码往执行栈中放入函数，当遇到异步�
 
 `Event Loop` 执行顺序如下所示：
 
-- 首先执行同步代码，这属于宏任务
+- 首先执行同步代码
 - 当执行完所有同步代码后，执行栈为空，查询是否有异步代码需要执行
 - 执行所有微任务
 - 当执行完所有微任务后，如有必要会渲染页面
-- 然后开始下一轮 Event Loop，执行宏任务中的异步代码，也就是 setTimeout 中的回调函数
+- 执行宏任务中的异步代码，也就是 setTimeout 中的回调函数，然后开始下一轮 `Event Loop`
 
 代码虽然 `setTimeout` 写在 `Promise` 之前，但是因为 `Promise` 属于微任务而 `setTimeout` 属于宏任务，所以会先执行 `Promise` 的回调
 
@@ -195,6 +193,184 @@ JS 引擎线程，执行 JS 代码往执行栈中放入函数，当遇到异步�
 
 因为宏任务中如 `script` 
 浏览器会先执行一个宏任务，内部产生异步代码的话才会先执行微任务(循环 ♻️)
+
+> 警告： 因为微任务自身可以入列更多的微任务，且事件循环会持续处理微任务直至队列为空，那么就存在一种使得事件循环无尽处理微任务的真实风险。如何处理递归增加微任务是要谨慎而行的。
+
+## event loop 调度
+
+[浏览器原理](./%E6%B5%8F%E8%A7%88%E5%99%A8%E5%8E%9F%E7%90%86.md)
+
+[事件循环-js现代教程](https://javascript.info/event-loop)
+
+事件循环(死循环执行任务)只针对异步任务
+
+我们先不考虑宏/微任务，只说异步任务
+
+各个流程产生的异步任务：
+- When an external script `<script src="...">` loads, the task is to execute it.
+- When a user moves their mouse, the task is to dispatch `mousemove` event and execute handlers.
+- When the time is due for a scheduled `setTimeout`, the task is to run its callback.
+- …and so on.
+
+这些不会立即执行的任务就被称为 **异步任务** ，并且存放到 **消息队列(先进先出)** 中，由一个死循环的事件循环来监听执行
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230331151026.png)
+
+除了内置的异步任务，我们也可以手动利用异步任务做一些性能优化，如 拆分 CPU 过载任务(`splitting CPU-hungry tasks`)
+
+如给文档的代码块做语法高亮，对静态页面做语法高亮的过程，是相当耗费 CPU 资源的
+
+当引擎忙于语法高亮时，它就无法处理其他 DOM 相关的工作，例如处理用户事件等。它甚至可能会导致浏览器“中断（hiccup）”甚至“挂起（hang）”一段时间
+
+我们可以通过将大任务拆分成多个小任务来避免这个问题。高亮显示前 100 行，然后使用 setTimeout（延时参数为 0）来安排（schedule）后 100 行的高亮显示，依此类推。
+
+### 拆分耗时同步任务
+
+同理，我们用一个长遍历模拟耗时任务，并尝试利用异步任务拆分
+
+👇 耗时同步任务
+```js
+let i = 0;
+let start = Date.now();
+
+function count() {
+  // do a heavy job
+  for (let j = 0; j < 1e9; j++) {
+    i++;
+  }
+
+  alert("Done in " + (Date.now() - start) + 'ms');
+}
+
+count();
+```
+
+👇 `setTimeout` 拆分
+```js
+let i = 0;
+let start = Date.now();
+
+function count() {
+  // do a piece of the heavy job (*)
+  do {
+    i++;
+  } while (i % 1e6 != 0);
+
+  if (i == 1e9) {
+    alert("Done in " + (Date.now() - start) + 'ms');
+  } else {
+    setTimeout(count); // schedule the new call (**)
+  }
+}
+
+count();
+```
+这样只是拆分了多个异步任务，如果需要先执行其他任务需要确保插入消息队列的时机在执行拆分前(如，js在执行，点击页面按钮事件就可以在间隙时响应)
+
+🤔 注意：这样拆分，只是实现了让我们可以优先执行其他的任务，并不会减少整体的时间
+
+```js
+let i = 0;
+let start = Date.now();
+
+function count() {
+  // move the scheduling to the beginning
+  if (i < 1e9 - 1e6) {
+    setTimeout(count); // schedule the new call
+  }
+
+  do {
+    i++;
+  } while (i % 1e6 != 0);
+
+  if (i == 1e9) {
+    alert("Done in " + (Date.now() - start) + 'ms');
+  }
+}
+
+count();
+```
+👆 把 `setTimeout` 放前面，在执行 `count` 时就创建一个异步任务，这样可以减少计时器的时间差(0ms并不只0ms)
+
+🤔 为什么比同步任务还快？ 同步都在一个地方，内存状态有关？
+
+### 进度条需求 js实时渲染DOM(手动让步给渲染引擎)
+
+> 浏览器自身就有对JS频繁操作 DOM渲染 延后处理的特性(`Vue.nextTick()`)
+> 
+> `JS引擎` 执行完所有同步任务后再由 `渲染引擎` 执行渲染，因此频繁操作 `DOM` ，最终只会执行1次
+
+👇 dom操作，发生在同步任务清空后
+```html
+<div id="progress"></div>
+
+<script>
+  function count() {
+    for (let i = 0; i < 1e6; i++) {
+      i++;
+      progress.innerHTML = i;
+    }
+  }
+  count();
+</script>
+```
+
+进度条不会实时渲染，而是等 `js` 任务完成后，才交由 `渲染引擎` 执行
+
+`js引擎` 和 `渲染引擎` 的交替执行
+
+> 渲染引擎发生在 **每个异步任务** 后
+
+因为异步任务都发生在同步任务执行完成后，因此我们说 渲染引擎发生在 **每个异步任务** 后
+
+需要理解没异步任务的情况是 `js引擎` 执行完同步任务后交由 `渲染引擎`
+
+正因为每个异步任务后都会 执行一次渲染，进度条需求就可以利用拆分异步任务的方式实现
+
+```html
+<div id="progress"></div>
+
+<script>
+  let i = 0;
+  function count() {
+    // 做繁重的任务的一部分 (*)
+    do {
+      i++;
+      progress.innerHTML = i;
+    } while (i % 1e3 != 0);
+
+    if (i < 1e6) {
+      setTimeout(count);
+    }
+  }
+  count();
+</script>
+```
+
+👇 微任务发生在渲染前，因此 进度条需求无法靠 **拆分微任务的异步任务** 实现
+
+```html
+<div id="progress"></div>
+<script>
+  let i = 0;
+  function count() {
+    // 做繁重的任务的一部分 (*)
+    do {
+      i++;
+      progress.innerHTML = i;
+    } while (i % 1e3 != 0);
+
+    if (i < 1e6) {
+      queueMicrotask(count); // <-- this
+    }
+  }
+  count();
+</script>
+```
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230331180840.png)
+
+🤔 为什么需要微任务
 
 ## nodejs的事件循环
 
