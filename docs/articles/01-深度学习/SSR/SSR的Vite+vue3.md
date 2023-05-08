@@ -200,6 +200,10 @@ createServer()
 
 TODO: `vite.ssrLoadModule()` 原理
 
+作用是构建客户端代码，并返回一个 `render()`，用于输出 `HTML`
+
+其实就相当于一个构建工具，如 `ssrLoadModule({entry: '/src/entry-server.ts'})`
+
 ## 合并最终 HTML 字符
 
 把 `vue代码执行转译成HTML字符` 后合并到 `模板HTML` 中，我们简单粗暴的通过字符串替换来合并即可
