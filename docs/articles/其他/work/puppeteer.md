@@ -511,6 +511,10 @@ const movieList = await crawlMovies()
 console.log(JSON.stringify(movieList, null, 2))
 ```
 
+## 部署
+
+[docker服务器中使用puppeteer踩坑记录](https://juejin.cn/post/7178734705703911480)
+
 ## 总结
 
 上面列出了一系列，我实际场景使用到的 `puppeteer` 中的工具函数，串起来就会是一个完整的 **通过无头浏览器操作表单完成登录** 的过程：

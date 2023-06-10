@@ -1,54 +1,3 @@
-[冴羽-ts](https://github.com/mqyqingfeng/learn-typescript)
-
-ts 同时具有以下功能：
-- 静态类型检查(扫描)
-- 编译输出js
-- 语法降级
-
-👆 我们发现和现在一些工具功能重复如 `编译-webpack`、`降级-babel`
-
-## 纯类型内容时的ts模块化
-
-在 ts 中默认不同文件也会共享 类型空间 和 变量空间, 不会因为不同文件而属于被模块化
-
-如👇  跨文件共享了变量
-```ts
-// a.ts
-const a = 'a'
-
-// b.js
-const b = a
-```
-
-ts 模块化需要手动编写，只要有 `import/export` 语法就会自动模块化如👇
-
-```ts
-// a.ts
-export const a = 'a' // <-- 加上 export 后不再共享 a.ts 文件的内容
-
-// b.ts
-import { a } from './a.ts' // <-- 因为 a.ts 模块化了，因此需要引入使用，同理加上 import 后 b.ts 文件内容也不再共享
-const b = a
-```
-
-因此当我们确实编写一个不需要导入导出的 ts 时，可以这么做👇
-
-```ts
-export {}
-
-// ... write your ts code
-```
-
-
-## 重写外部依赖的类型声明
-
-```ts
-declare module 'foo' { // ✨ 声明的是 module 类型
-  // some variable declarations
-  export var bar: number;
-}
-```
-👆 当然一般不需要重写，安装对应的 @type 包即可，甚至不用配置，ts 解析器会默认查找 `node_modules/@types` 目录 (可以自定义)
 
 ## TS 使用全局变量
 
@@ -71,30 +20,6 @@ interface Window {
 
 `d.ts` 的处理都是合并的
 
-
-## TS 模块化识别非.ts文件
-
-ts 文件引入其他文件模块 如👇 css
-```js
-import * as foo from './some/file.css'
-```
-
-使用 `.d.ts` 库声明文件
-```ts
-declare module '*.css';
-```
-
-一般是创建 `env.d.ts`
-
-
-## tsConifg 配置引入(继承)方式
-
-在 `vite` 中是
-
-- `.d.ts` 的引用语句是 `/// <reference types="vite/client" />`
-- `tsconfig.json` 的引用语句是 `"extends": "@vue/tsconfig/tsconfig.web.json"`
-
-注意 `tsconfig.json` 的 `references`字段 并不是引用语句，而是区分环境的语句 单独再生效一份 `tsconfig` 的功能
 
 ## type 和 interface
 
@@ -642,3 +567,24 @@ type T2opt = {[key in string]?: null};
 // This is "[key in string]" and not "[key: string]" to allow CSSObject to be self-referential
 ```
 using in apparently allows for self-reference, as seen in [@types/styled-components/index.d.ts#24:](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/styled-components/index.d.ts#L24)
+
+
+## 定时器
+
+[setTimeout() 函数的TypeScript返回类型](https://juejin.cn/post/7008043042280046599)
+
+```js
+const [intervalItem,setIntervalItem] = useState<number>()
+```
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20230524110849.png)
+
+👇 用 window 并定义成number 类型
+```js
+const [intervalItem,setIntervalItem] = useState<number>()
+
+// 轮询
+const interval = window.setInterval(()=>{
+  console.log('dd')
+}, 2000)
+setIntervalItem(interval)
+```
