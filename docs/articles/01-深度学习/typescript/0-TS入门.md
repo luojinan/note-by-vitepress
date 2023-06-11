@@ -22,6 +22,9 @@ TS 项目开发中的 一些概念：
 
 > 在开发阶段，我们推荐你靠 IDE 来获取即时的类型错误反馈 - [vue3文档](https://cn.vuejs.org/guide/typescript/overview.html#overview)
 
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/202306110002326.png)
+
+👆 和所有涉及编译原理的技术原理相同，如`babel`、`eslint`、`vue->js`
 
 ## 学习路线
 
@@ -85,6 +88,8 @@ TS 项目开发中的 一些概念：
 
 这保证了 `Vite` 开发服务器在使用 `TypeScript` 时也能始终保持飞快的速度
 
+Vite 之所以不把类型检查作为转换过程的一部分，是因为这两项工作在本质上是不同的。转译可以在每个文件的基础上进行，与 Vite 的按需编译模式完全吻合。相比之下，类型检查需要了解整个模块图。把类型检查塞进 Vite 的转换管道，将不可避免地损害 Vite 的速度优势。
+
 如果需要类型检查来拦截代码提交，可以使用 `tsc` 命令执行类型检查(不输出js `noEmit`)
 
 而 `Vue` 因为是 `.vue` 文件而不是 ts文件，因此提供一个 `vue-tsc` 命令工具
@@ -96,3 +101,49 @@ TS 项目开发中的 一些概念：
 > 开启 `Vite` 开发服务器的同时以侦听模式运行 `vue-tsc`
 > 
 > 或是使用 `vite-plugin-checker` 这样在另一个 `worker` 线程里做静态检查的插件
+
+## d.ts
+
+> `d.ts` - `declaration files` 声明文件，本质上还是ts文件，这更像是一种约定
+>
+> 一般指：库文件，用于声明第三方库，或自己定义的库目录
+
+- 内置的`d.ts`: `lib.dom.d.ts`
+- 安装第三方库的`d.ts`: @types/jquery/index.d.ts
+- 安装第三方库的`node/globals.d.ts` 会无视 `tsconfig` 的 `lib`，如: `@types/node`
+- 业务代码创建的 `d.ts`
+
+第三方库:👇
+
+如 `jquery` 需要手安装 `@types/jquery` 则会安装到 当前项目的 `node_modules/@types/` 下
+
+内置库文件:👇
+
+我们点进 `console` 的类型声明 会跳到 `VSCode(插件)` 提供的 `lib.dom.d.ts` 而不是 ts的
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/202306031741730.png)
+
+业务代码 `d.ts`: 👇
+
+可以创建在项目任何目录，并且任意命名，若分模块创建多个会被ts合并成一个来识别(会自动去重)
+
+我们常把自定义`d.ts` 写在项目根目录，或 `typing/` 目录下
+
+一方面是为了方便管理，另一方面是为了避免同名错误如：👇
+```
+/
+├── src/utils/
+│   ├── index.ts
+│   └── index.d.ts
+└── tsconfig.json
+```
+👆 我们把类型写在同级的 `d.ts` 下作为全局类型，不使用 `import` 而是直接使用类型
+
+此时 ts 会帮我们寻找类型，理论上，`d.ts` 定义的是全局的类型，可以直接使用，但是发现不生效：
+1. `index.ts` 会从自身寻找类型定义
+2. 往同级目录 `d.ts` 寻找，但是忽略同名 `index.d.ts`
+3. 往上级目录寻找 `d.ts`
+
+## 类型空间和变量空间
+
+[TS模块化](./TS%E6%A8%A1%E5%9D%97%E5%8C%96.md#纯类型内容时的TS模块化)
