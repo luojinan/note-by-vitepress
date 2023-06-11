@@ -106,7 +106,7 @@
 
 > 🤔 为什么包括js文件,不能编写类型语法，会有类型提示？
 
-> [js相关allowjscheckjs](#js相关allowjscheckjs)
+> [js相关allowjscheckjs](#js相关allowjs-checkjs)
 
 ## 复用配置references、extends
 
@@ -381,18 +381,6 @@ a = '' // VSCode 报红类型错误
 
 我们看到 `tsc --init` 生成的 [默认配置](#tsc-init) 中是开启这个的
 
-## 格式相关
-
-| _ | _ |
-| ---| --- |
-| noImplicitAny | 不允许隐式的`any`，默认`false`（允许）
-| noFallthroughCasesInSwitch | 检查`switch`语句包含正确的`break`
-| noImplicitReturns | 不允许隐式的`return`，设为`true`后，如果函数没有返回值则会提示
-| noUnusedLocals | 检查有没有未使用的局部变量
-| strictNullChecks | 检查空值，检查有可能为`null`的地方，对象链式调用确保不会是`null`
-
-👆 和 `eslint` 作用有点重合
-
 ## isolatedModules
 
 > 是否将每个文件作为单独的模块，即：不考虑每个文件的导入导出
@@ -427,7 +415,19 @@ a = '' // VSCode 报红类型错误
 
 此时 配置 `noEmit` 相当于仅执行类型扫描，不执行转译
 
-与项目 `dev` 和 `build` 过程都独立
+与项目 `dev` 和 `build` 过程都独立，不影响项目编译性能
+
+## 格式相关
+
+| _ | _ |
+| ---| --- |
+| noImplicitAny | 不允许隐式的`any`，默认`false`（允许）
+| noFallthroughCasesInSwitch | 检查`switch`语句包含正确的`break`
+| noImplicitReturns | 不允许隐式的`return`，设为`true`后，如果函数没有返回值则会提示
+| noUnusedLocals | 检查有没有未使用的局部变量
+| strictNullChecks | 检查空值，检查有可能为`null`的地方，对象链式调用确保不会是`null`
+
+👆 和 `eslint` 作用有点重合
 
 ## 其他
 
@@ -450,6 +450,4 @@ declare module '*.css';
 declare module '*.json';
 ```
 `declare module` 声明语法，一般是创建 `env.d.ts`
-
-
 
