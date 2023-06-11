@@ -98,12 +98,15 @@
 可以看出一般：
 - `include`
   - src目录下的业务代码(路由页面、组件、工具方法等)
-  - 根目录下的配置文件(`eslintrc、prettierrc、stylelintrc`) TODO: 为什么包括js文件,不能编写类型语法，会有类型提示？
+  - 根目录下的配置文件(`eslintrc、prettierrc、stylelintrc`)
 - `exclude`
   - 打包产物 `dist/`
   - nodejs脚本 `scripts/`
   - umi 自动生成的内容 `src/.umi/`
 
+> 🤔 为什么包括js文件,不能编写类型语法，会有类型提示？
+
+> [js相关allowjscheckjs](#js相关allowjscheckjs)
 
 ## 复用配置references、extends
 
@@ -308,18 +311,20 @@
 > 
 > 你可以在上游仓库(`vue`)修复好之前暂时使用 `"skipLibCheck": true` 来缓解这个错误
 
-## types TODO:
-types 和lib配置区别
-1. 都是d.ts - lib是内置的不同版本js和浏览器环境.d.ts `vscode/node_modules/types`？
-2. types则是需要自己引入的 库.d.ts 或 node.d.ts - `node_modules/@types`
+## types/typeRoots
 
-默认从 node_modules/@types/ 下读取第三方(非dom、esx.core等内置) d.ts
+和 `lib` 相同，作用于 `ts` 使用哪些库文件：
 
-可以手动关闭，自定义读取哪些 types
+- `lib` 指定：内置库文件，默认根据 target 自动匹配 `vscode/node_modules/types`
+- `types/typeRoots` 指定第三方库文件，默认所有 `node_modules/@types/`
 
-typeRoots
+和手动配置 lib 同理，因为默认所有 `node_modules/@types/`，不用手动配置，手动配置一般出于优化 **ts扫描性能** 的目的
 
-types
+配置了 `types` ，代表仅安装 `@types` 不会生效，需要手动添加到了 `types` 中
+
+如：`Vite` 的 配置了 `types: ["node"]`，安装 `@types/node`
+
+因为 `nodejs` 暴露 `api` 是使用 js编写的，为了获得其包的类型定义，需要安装名为 `@types/node` 的第三方包
 
 ## path相关rootDir/baseUrl/paths
 
@@ -354,8 +359,21 @@ a = '' // VSCode 报红类型错误
 
 因此有时我们会看到一些 `include` 配置 `['*.js']` ，确实是会让 `js` 具有一定的 `ts` 能力
 
-## jsx TODO: 
+## jsx
 
+[jsx -tsconfig 官方文档](https://www.typescriptlang.org/tsconfig#jsx)
+
+- `react`: Emit `.js` files with JSX changed to the equivalent React.createElement calls
+- `react-jsx`: Emit `.js` files with the JSX changed to _jsx calls
+- `react-jsxdev`: Emit `.js` files with the JSX changed to _jsx calls
+- `preserve`: Emit `.jsx` files with the JSX unchanged
+- `react-native`: Emit `.js` files with the JSX unchanged
+
+👆 这些模式只在代码生成阶段起作用，类型检查并不受影响
+
+使用 `React17` 时，用 `react-jsx/react-jsxdev` 即可省略 `import React`
+
+同时留意是否需要升级 `typescript`
 
 ## esModuleInterop
 
@@ -373,14 +391,35 @@ a = '' // VSCode 报红类型错误
 | noUnusedLocals | 检查有没有未使用的局部变量
 | strictNullChecks | 检查空值，检查有可能为`null`的地方，对象链式调用确保不会是`null`
 
-👆 和 eslint 作用有点重合
+👆 和 `eslint` 作用有点重合
 
+## isolatedModules
 
-## isolatedModules TODO:
+> 是否将每个文件作为单独的模块，即：不考虑每个文件的导入导出
 
-是否将每个文件作为单独的模块
+因为 `ts模块化` 包括 `变量空间` 和 `类型空间`，导入导出也是，因此 `tsc` 具有 **全局分析** 的能力，全局扫描后分析出需要导入的是类型还是变量
 
-vue3 要求开启
+而在现代前端构建项目中，仅仅对 `ts` 做擦除处理，因此并不会有全局分析的过程，仅仅针对单个文件进行分析需要擦除的语法，此时若存在不清晰的导入导出，将会无法擦拭
+
+如：
+- 从其它模块类型后未使用该类型
+- 重导出(`expot { Type } from`)其它模块的类型
+- 引入其它模块的`const enum`并使用
+- 使用`namespace`语法
+
+因此在现代前端构建项目里，我们人为的让ts模块化的导入导出清晰起来，就是使用 `import type {}`
+
+让 转移器(擦除：`esbuild`) 不需要分析 `被导入文件` 内容是类型还是变量
+
+而开启 `isolatedModules` 就可以让静态扫描 `IDE(VSCode)` 给出相应的提示。即：不开启此配置也可以，但是需要人为约定编程规范
+
+所以 `Vite` 等仅擦除的工具会建议开启，而使用全局扫描的 `tsc` 时则无所谓
+
+[理解Typescript配置项: isolateModules](https://juejin.cn/post/7053298681037979678)
+
+- `tsc` 的类型分析是项目级(全局分析)的，因此比起其它单文件分析类型的编译器，它能比其它的知道更多类型信息，因此对于非模块隔离的代码也能灵活处理
+- 项目级的类型分析比单文件的类型分析更加强大，但代价就是它的运行速度会比单文件分析更慢。
+- 如果使用 `ts-loader`, 它会用`tsc`分析整个项目。然而当它的 `transpileOnly` 选项为 `true` 时，它也将降级为仅对当前文件进行分析，此时也必须要求模块的隔离性，请启用 `isolateModules`
 
 ## noEmit
 
