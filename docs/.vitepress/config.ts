@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import { withPwa } from '@vite-pwa/vitepress'
 // import initPage from './initPage'
 import { getSidebarData, getNavData } from './initPage'
 import Inspect from 'vite-plugin-inspect'
@@ -6,7 +7,7 @@ import UnoCSS from 'unocss/vite'
 import presetUno from '@unocss/preset-uno'
 import { VitepressIndexPage } from './plugins/vitepress-index-page'
 
-export default defineConfig({
+export default withPwa(defineConfig({
   base: "/notepage/",
   title: "罗锦安的blog",
   description: "vue、js、nodejs等等的学习记录",
@@ -49,6 +50,7 @@ export default defineConfig({
     // 表示显示h2-h6的标题
     outline: 'deep',
   },
+  pwa:{},
   vite:{
     plugins:[
       Inspect(),
@@ -60,4 +62,4 @@ export default defineConfig({
       VitepressIndexPage()
     ]
   }
-})
+}))

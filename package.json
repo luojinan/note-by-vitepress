@@ -10,10 +10,12 @@
   },
   "devDependencies": {
     "@unocss/preset-uno": "^0.53.1",
+    "@vite-pwa/vitepress": "^0.2.0",
     "fast-glob": "^3.2.12",
     "glob": "^7.2.0",
     "unocss": "^0.53.1",
     "vite-plugin-inspect": "^0.7.28",
+    "vite-plugin-pwa": "^0.16.4",
     "vitepress": "1.0.0-beta.2",
     "vue": "^3.2.45"
   }
