@@ -1,8 +1,9 @@
 import glob from 'fast-glob'
+import { getRandomEmoji } from './emoji'
 
 const generrateIndexPage = (id)=>{
   const [,title] = id.match(/articles\/(.*?)\/index.md/)
-  
+
   const files = glob.sync([`${id.match(/(.*?)\/index.md/)[1]}/**/*.md`])
   const list = files.reduce((res,next)=>{
     const [,pagePath] = next.match(/articles\/(.*?).md/) || []
@@ -10,10 +11,16 @@ const generrateIndexPage = (id)=>{
 
     if(dir==='index') return res
     const index = res.findIndex(item=>item.title === dir)
+    const emoji = getRandomEmoji()
+    const childItem = {
+      title: md,
+      path: `articles/${title}/${dir}/${md}`,
+      emoji,
+    }
     if(index>-1) {
-      res[index].childs.push({title: md})
+      res[index].childs.push(childItem)
     }else{
-      res.push({title: dir, childs:[{title: md}]})
+      res.push({title: dir, childs:[childItem]})
     }
     return res
   },[])
