@@ -531,3 +531,8 @@ console.log(JSON.stringify(movieList, null, 2))
 - [结合项目来谈谈 Puppeteer](https://zhuanlan.zhihu.com/p/76237595)
 - [Web Performance Recipes With Puppetee](https://addyosmani.com/blog/puppeteer-recipes/)
 - [nestjs puppeteer 掘金签到](https://juejin.cn/post/7051521399168434184)
+
+
+## waitForSelecor 问题
+
+[issue github](https://github.com/puppeteer/puppeteer/issues/4011#issuecomment-463810636)

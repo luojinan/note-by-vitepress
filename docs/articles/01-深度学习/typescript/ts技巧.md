@@ -1,5 +1,11 @@
+[ts 问题](https://tate-young.github.io/2021/01/21/ts-update.html)
 
 ## TS 使用全局变量
+
+因为 ts 项目的全局变量全部来源于显式的代码定义，当使用一些其他渠道定义的全局变量，ts 将不认识如：👇
+1. HTML 通过 `<srcipt>` 引入 umd 模块
+2. 编译器环境变量工具 `webpack-defind`
+3. ...
 
 前端工程里经常需要使用到一些 `umd` 的第三方库，这些资源挂载在 window 下
 
@@ -20,6 +26,14 @@ interface Window {
 
 `d.ts` 的处理都是合并的
 
+## 重写第三方依赖的类型声明
+
+```ts
+declare module 'jquery' { // ✨ 声明的是 module 类型
+  // some variable declarations
+  export var bar: number;
+}
+```
 
 ## type 和 interface
 
@@ -111,6 +125,22 @@ function a( params: { b?: number }) {
   return b! + 1
 }
 ```
+
+## new Map
+
+把对象数组通过 map 转为 二维数组给到 new Map()，会提示不是 readonly，并且不会自动推断 二维数组里的项是string 而是 unknow
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/202306121422114.png)
+
+```ts
+const list = res.map(item => {
+  return [item.code, item.value] as const // ✨
+})
+
+new Map(list)
+```
+
+数组转为 `as const` 后成功推断
+
 
 ## 枚举会保留到产物里(特殊)
 
