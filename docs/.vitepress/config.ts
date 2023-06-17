@@ -1,6 +1,10 @@
 import { defineConfig } from 'vitepress'
 // import initPage from './initPage'
 import { getSidebarData, getNavData } from './initPage'
+import Inspect from 'vite-plugin-inspect'
+import UnoCSS from 'unocss/vite'
+import presetUno from '@unocss/preset-uno'
+import { VitepressIndexPage } from './plugins/vitepress-index-page'
 
 export default defineConfig({
   base: "/notepage/",
@@ -45,4 +49,15 @@ export default defineConfig({
     // 表示显示h2-h6的标题
     outline: 'deep',
   },
+  vite:{
+    plugins:[
+      Inspect(),
+      UnoCSS({
+        presets: [
+          presetUno(),
+        ]
+      }),
+      VitepressIndexPage()
+    ]
+  }
 })
