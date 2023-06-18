@@ -25,9 +25,10 @@ const generrateIndexPage = (id)=>{
     return res
   },[])
   const test = JSON.stringify(list)
+  const IndexPageCompPath = new URL('./IndexPage.vue', import.meta.url).pathname
   return `
 <script setup>
-import IndexPage from '/Users/luojinan/Desktop/code/vitepress/docs/.vitepress/plugins/vitepress-index-page/IndexPage.vue'
+import IndexPage from '${IndexPageCompPath}'
 const list = ${test}
 </script>
 
