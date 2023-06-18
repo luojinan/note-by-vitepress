@@ -41,4 +41,9 @@ const jump = (item: Item) => {
 .test {
   background-color: var(--vp-c-bg-soft);
 }
+@media (min-width: 375px) and (max-width: 768px) {
+  .list {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
 </style>
