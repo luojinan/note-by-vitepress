@@ -40,6 +40,19 @@ const list = ${test}
 export function VitepressIndexPage() {
   return {
     name: 'vitepress-index-page',
+    // 👇 nav link 虚拟文件
+    resolveId(id) {
+      if (/articles\/(.*?)index\.md/.test(id)) {
+        const { pathname } = new URL(`../../..${id}`, import.meta.url)
+        return decodeURI(pathname)
+      }
+    },
+    load(id) {
+      if (/articles\/(.*?)index\.md/.test(id)) {
+        return ''
+      }
+    },
+    // 👇 nav indexPage 内容
     transform(src, id) {
       if (/articles\/(.*?)index\.md/.test(id)) {
         // console.log(id,src)
