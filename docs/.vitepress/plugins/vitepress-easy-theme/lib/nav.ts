@@ -68,6 +68,6 @@ export function getNavData(navGenerateConfig: NavGenerateConfig) {
   console.log('dirFullPath',dirFullPath)
   const result = getNavDataArr(dirFullPath, 1, maxLevel, enableDirActiveMatch)
   // console.log('navData')
-  console.log(result)
+  // console.log(result)
   return result
 }

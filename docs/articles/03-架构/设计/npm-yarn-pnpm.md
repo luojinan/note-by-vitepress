@@ -124,7 +124,7 @@ node_modules
 
 所有的依赖都是从全局 `store` 硬连接到了 `node_modules/.pnpm` 下，然后之间通过软链接来相互依赖。
 
-```text
+```txt
 node_modules
 ├─ .pnpm
 │   └─ dayjs@1.10.7
@@ -141,7 +141,7 @@ Every file of every package inside `node_modules` is a hard link to the
 content-addressable store. Let's say you install `foo@1.0.0` that depends on
 `bar@1.0.0`. pnpm will hard link both packages to `node_modules` like this:
 
-```text
+```txt
 node_modules
 └── .pnpm
     ├── bar@1.0.0
@@ -177,7 +177,7 @@ any other `node_modules` in the parent directories.
 The next stage of installation is symlinking dependencies. `bar` is going to be
 symlinked to the `foo@1.0.0/node_modules` folder: 👇
 
-```text
+```txt
 node_modules
 └── .pnpm
     ├── bar@1.0.0
@@ -194,7 +194,7 @@ node_modules
 Next, direct dependencies are handled. `foo` is going to be symlinked into the
 root `node_modules` folder because `foo` is a dependency of the project: 👇
 
-```text
+```txt
 node_modules
 ├── foo -> ./.pnpm/foo@1.0.0/node_modules/foo
 └── .pnpm
@@ -215,7 +215,7 @@ regardless of the number of dependencies and the depth of the dependency graph.
 Let's add `qar@2.0.0` as a dependency of `bar` and `foo`. This is how the new
 structure will look: 👇
 
-```text
+```txt
 node_modules
 ├── foo -> ./.pnpm/foo@1.0.0/node_modules/foo
 └── .pnpm

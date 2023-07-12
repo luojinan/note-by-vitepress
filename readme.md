@@ -48,7 +48,7 @@ dns 解析问题，手动指定可用的 ip
 - http://ip-api.com
 
 填写到 `HOST` 文件中(`Live Host` Vscode插件)
-```text
+```txt
 # Github
 118.184.78.78                github.global.ssl.fastly.net
 185.199.108.153               assets-cdn.github.com
