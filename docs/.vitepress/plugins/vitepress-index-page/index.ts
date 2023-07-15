@@ -41,14 +41,18 @@ export function VitepressIndexPage() {
   return {
     name: 'vitepress-index-page',
     // 👇 nav link 虚拟文件
+    // devserver时运行时访问自动补全index.md
+    // rollup时只根据本地目录构建，尝试生成sidebar配置，看构建是不是只根据目录实体文件构建
     resolveId(id) {
       if (/articles\/(.*?)index\.md/.test(id)) {
+        // console.log('resolveId',id)
         const { pathname } = new URL(`../../..${id}`, import.meta.url)
         return decodeURI(pathname)
       }
     },
     load(id) {
       if (/articles\/(.*?)index\.md/.test(id)) {
+        // console.log('load',id)
         return ''
       }
     },
@@ -63,5 +67,5 @@ export function VitepressIndexPage() {
       }
     },
     enforce: 'pre'
-}
+  }
 }
