@@ -24,12 +24,11 @@ const generrateIndexPage = (id)=>{
     }
     return res
   },[])
-  const test = JSON.stringify(list)
   const IndexPageCompPath = new URL('./IndexPage.vue', import.meta.url).pathname
   return `
 <script setup>
 import IndexPage from '${IndexPageCompPath}'
-const list = ${test}
+const list = ${JSON.stringify(list)}
 </script>
 
 # ${title.substring(3)}

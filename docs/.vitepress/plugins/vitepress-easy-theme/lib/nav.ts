@@ -65,7 +65,7 @@ export function getNavData(navGenerateConfig: NavGenerateConfig) {
   // console.log(import.meta.url, docsPath)
   // console.log('1111', new URL(`./docs/${dirName}`,docsPath).pathname)
   const dirFullPath =  new URL(`./${dirName}`,docsPath).pathname
-  console.log('dirFullPath',dirFullPath)
+  // console.log('dirFullPath',dirFullPath)
   const result = getNavDataArr(dirFullPath, 1, maxLevel, enableDirActiveMatch)
   // console.log('navData')
   // console.log(result)
