@@ -19,10 +19,10 @@ function getNavDataArr(
   level: number,
   maxLevel: number,
   enableActiveMatch: boolean
-): DefaultTheme.NavItem[] {
+): DefaultTheme.NavItemWithLink[] {
   // 获取所有文件名和目录名
   const allDirAndFileNameArr = readdirSync(dirFullPath)
-  const result: DefaultTheme.NavItem[] = []
+  const result: DefaultTheme.NavItemWithLink[] = []
   allDirAndFileNameArr.map((fileOrDirName: string) => {
     const fileOrDirFullPath = join(dirFullPath, fileOrDirName)
     const stats = statSync(fileOrDirFullPath)
@@ -32,7 +32,7 @@ function getNavDataArr(
     const text = fileOrDirName.match(/^[0-9]{2}-.+/) ? fileOrDirName.substring(3) : fileOrDirName
     if (stats.isDirectory()) {
       // 当前为文件夹
-      const dirData: DefaultTheme.NavItem = {
+      const dirData: DefaultTheme.NavItemWithLink = {
         text,
         link: `${link}/`,
       }

@@ -44,27 +44,27 @@ export function VitepressIndexPage() {
     // devserver时运行时访问自动补全index.md
     // rollup时只根据本地目录构建，尝试生成sidebar配置，看构建是不是只根据目录实体文件构建
     resolveId(id) {
-      if (/articles\/(.*?)index\.md/.test(id)) {
-        // console.log('resolveId',id)
-        const { pathname } = new URL(`../../..${id}`, import.meta.url)
-        return decodeURI(pathname)
-      }
+      // if (/articles\/(.*?)index\.md/.test(id)) {
+      //   console.log('resolveId',id)
+      //   // const { pathname } = new URL(`../../..${id}`, import.meta.url)
+      //   // return decodeURI(pathname)
+      // }
     },
     load(id) {
       if (/articles\/(.*?)index\.md/.test(id)) {
         // console.log('load',id)
-        return ''
+        return generrateIndexPage(id)
       }
     },
     // 👇 nav indexPage 内容
     transform(src, id) {
-      if (/articles\/(.*?)index\.md/.test(id)) {
-        // console.log(id,src)
-        return {
-          code: generrateIndexPage(id),
-          map: null, // provide source map if available
-        }
-      }
+      // if (/articles\/(.*?)index\.md/.test(id)) {
+      //   console.log(id,src)
+      //   // return {
+      //   //   code: generrateIndexPage(id),
+      //   //   map: null, // provide source map if available
+      //   // }
+      // }
     },
     enforce: 'pre'
   }

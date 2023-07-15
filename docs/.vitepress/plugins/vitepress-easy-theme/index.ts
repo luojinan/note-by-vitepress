@@ -29,6 +29,12 @@ export const withEasyTheme = (config) => {
   Object.assign(config, chinessConfig)
   // 根据目录自动生成 nav、sidebar 目录配置
   Object.assign(config.themeConfig, navSidebar)
+  // rewrite + Dynamic Routes 用于解决 rollup file-base router 没有实体文件不打包的问题，使1个文件作为多个路由页面
+  const rewrites = navSidebar.nav.reduce((res, item)=>{
+    res[`${item.link.slice(1)}test.md`] = '[test].md'
+    return res
+  },{})
+  Object.assign(config, rewrites)
 
   config.vite = { // 合并而不是覆盖
     plugins:[
