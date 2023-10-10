@@ -64,3 +64,21 @@ sh deploy.sh
 通过 链接 [[homepage -github.io](https://luojinan.github.io/notepage)](https://luojinan.github.io/notepage/) 访问验证是否部署成功
 
 浏览器强刷新(不走浏览器缓存) `ctrl/command + shift + r` / `ctrl + f5`
+
+## 图床
+
+使用 阿里云OSS
+
+macbook 在github 下载最新安装包
+
+拖拽安装PicGO后，打开可能会提示`文件损坏`
+
+实际上安装包并没有损坏，是 macbook 的来源校验问题
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog202310101947133.png)
+
+```
+sudo spctl --master-disable
+xattr -cr /Applications/PicGo.app
+```
+👆 运行后正常使用，配置图床key信息即可
