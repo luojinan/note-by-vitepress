@@ -1,3 +1,7 @@
+[demo - Nuxt3原仓库使用分支部署到github page](https://github.com/clairechang0609/nuxt3-generate/tree/main)
+
+[note - Nuxt3原仓库使用分支部署到github page](https://github.com/lucpotage/nuxt-github-pages)
+
 # Nuxt3 技术博客大纲
 
 ## 1. 介绍
