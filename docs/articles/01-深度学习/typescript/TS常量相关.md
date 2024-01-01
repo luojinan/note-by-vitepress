@@ -1,5 +1,10 @@
 # TS 常量相关
 
+TODO:
+
+[使用 TypeScript 定义业务字典](https://juejin.cn/post/7187963986875252795)
+
+[代码片段](https://gist.github.com/jsonleex/123396dc33b41dc1c332653213ac03f9)
 ## as const 常量断言
 
 ```ts

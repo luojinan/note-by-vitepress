@@ -1,34 +1,40 @@
 # 虚拟DOM
 
+1. 虚拟 DOM 是 JS 对象
+2. 虚拟 DOM 是对真实 DOM 的描述
+
+挂载阶段，React 将结合 JSX 的描述，构建出虚拟 DOM 树，然后通过 ReactDOM.render 实现虚拟 DOM 到真实 DOM 的映射（触发渲染流水线）；
+
+更新阶段，页面的变化在作用于真实 DOM 之前，会先作用于虚拟 DOM，虚拟 DOM 将在 JS 层借助算法先对比出具体有哪些真实 DOM 需要被改变，然后再将这些改变作用于真实 DOM。
+
 🌟 [深入剖析：Vue核心之虚拟DOM#10](https://github.com/fengshi123/blog/issues/10)
 
 [解析vue2.0的diff算法 #2](https://github.com/aooy/blog/issues/2)
 
-## virtualDom
+## virtualDom TODO: 完善概念 无虚拟DOM框架的兴起
 
-为什么说真是DOM很重
+为什么说 `真实DOM` 很重
 
-我们可以打印一个空的div对象的属性
+我们可以打印一个 `空的div对象` 中所有的属性
+
 ```js
 var mydiv = document.createElement('div');
 for(var k in mydiv ){
   console.log(k)
 }
 ```
-👆 dom 是可遍历(有迭代器属性)的对象
+👆 `dom` 是可遍历的对象(有迭代器属性)
 
-virtualDom 就是解决这个问题的一个思路，用一个简单的对象去代替复杂的dom对象
+`virtualDom` 就是解决 `真实DOM` 太复杂的一个思路，用一个简单的对象去代替复杂的dom对象
 
-因此加了一层 virtualDom 的操作如下
-
-👇 直接操作DOM
+👇 直接操作 `真实DOM` ：
 ```js
 var mydiv = document.createElement('div');
 mydiv.className = 'a';
 document.body.appendChild(mydiv);
 ```
 
-👇 加一层 virtualDom
+👇 加一层 `virtualDom` 后的操作如下:
 ```js
 //伪代码
 var vNode = { 
@@ -46,7 +52,7 @@ if(vNode.tag !== newvNode.tag || vNode.class  !== newvNode.class){
 // 会执行相应的修改 mydiv.className = 'b';
 //最后  <div class='b'></div>
 ```
-👆 已经可以看到相应的 virtualDom 更新步骤了
+👆 已经可以看到相应的 `virtualDom` 更新步骤了
 
 1. diff - 判断old/new virtualDom 是否变化, 此步骤需要递归算法速度最快
 2. patch - change 函数真实修改DOM, 此步骤需要最小范围操作DOM
@@ -58,6 +64,10 @@ if(vNode.tag !== newvNode.tag || vNode.class  !== newvNode.class){
 但是页面结构很庞大，结构很复杂时，手工优化会花去大量时间，而且可维护性也不高，不能保证每个人都有手工优化的能力。virtualDom很多时候都不是最优的操作，但它具有普适性，在效率、可维护性之间达平衡。
 
 virtualDom 另一个重大意义就是跨端，提供一个中间层，js写ui，ios安卓之类的负责渲染，就像reactNative一样。
+
+### 手写生成 虚拟DOM
+
+记住得到的 `虚拟DOM` 仍然是一个普通的 `JS对象`
 
 ```js
 import { createVNode } from "./vnode.js"
@@ -73,7 +83,7 @@ var ul = createVNode('div',{id:'virtual-dom'},[
 ]) 
 ```
 
-👇 `vnode.js`
+👇 `vnode.js` 的 `createVNode()`
 ```js
 /**
  * Element virdual-dom 对象定义
@@ -111,7 +121,10 @@ export function createVNode(tagName, props, children){
 
 得到带有层级关系的 js 对象数据
 
-👆 createVNode 就是 vue 中的函数式组件 `render: function(h){h()}`
+👆 `createVNode` 就是 `vue` 中的函数式组件 `render: function(h){h()}`
+
+### 手写 虚拟DOM 转 真实DOM
+
 ```js
 /**
  * render 将virdual-dom 对象渲染为实际 DOM 元素

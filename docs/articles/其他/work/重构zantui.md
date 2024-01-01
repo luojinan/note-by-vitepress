@@ -1,0 +1,1 @@
+当前 zantui 还是 class component
