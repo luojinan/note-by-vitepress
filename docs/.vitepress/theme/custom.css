@@ -43,4 +43,10 @@
 }
 .aside {
   order: unset !important;
+}
+
+.content-container{
+  font-size: 20px;
+  padding-right: 100px;
+  max-width: unset !important;
 } */
