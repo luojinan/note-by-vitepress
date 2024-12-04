@@ -1,6 +1,6 @@
 # vitepress文档
 
-[homepage -github.io](https://luojinan.github.io/notepage/)
+[homepage -github.io](https://luojinan.github.io/note-by-vitepress/)
 
 ## 本地运行
 
@@ -36,18 +36,21 @@ git push origin master
 dns 解析问题，手动指定可用的 ip
 
 先找到 git 命令行操作涉及到的几个相关域名：
+
 - github.com
 - github.global.ssl.fastly.net
 - assets-cdn.github.com
 - ...
 
 然后可以到下面几个 ip 查询的网站(任选一个就行)，查找其对应的 ip 地址：
-- https://github.com.ipaddress.com
-- http://ip.tool.chinaz.com - ✨ 可用
-- https://whatismyipaddress.com//hostname-ip
-- http://ip-api.com
+
+- <https://github.com.ipaddress.com>
+- <http://ip.tool.chinaz.com> - ✨ 可用
+- <https://whatismyipaddress.com//hostname-ip>
+- <http://ip-api.com>
 
 填写到 `HOST` 文件中(`Live Host` Vscode插件)
+
 ```txt
 # Github
 118.184.78.78                github.global.ssl.fastly.net
@@ -61,7 +64,7 @@ dns 解析问题，手动指定可用的 ip
 sh deploy.sh
 ```
 
-通过 链接 [[homepage -github.io](https://luojinan.github.io/notepage)](https://luojinan.github.io/notepage/) 访问验证是否部署成功
+通过 链接 [[homepage -github.io](https://luojinan.github.io/note-by-vitepress)](<https://luojinan.github.io/note-by-vitepress/>) 访问验证是否部署成功
 
 浏览器强刷新(不走浏览器缓存) `ctrl/command + shift + r` / `ctrl + f5`
 
@@ -81,4 +84,5 @@ macbook 在github 下载最新安装包
 sudo spctl --master-disable
 xattr -cr /Applications/PicGo.app
 ```
+
 👆 运行后正常使用，配置图床key信息即可

@@ -33,7 +33,7 @@ defineProps<{
 
 const router = useRouter()
 const jump = (item: Item) => {
-  router.go(`./notepage/${item.path}`)
+  router.go(`./note-by-vitepress/${item.path}`)
 }
 </script>
 

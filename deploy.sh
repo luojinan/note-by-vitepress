@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# 【废弃】改用 github action 
 
 # 运行 sh deploy.sh
 # 不生效时1. 检查仓库有没有提交记录 2.博客页面要禁用缓存
