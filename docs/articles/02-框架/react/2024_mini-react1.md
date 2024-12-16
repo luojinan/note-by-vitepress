@@ -452,9 +452,17 @@ console.log(add(4)); // 返回 8
 
 ### React 任务调度
 
-在 `React 16` 引入的Fiber架构之后。Fiber使得React能够中断渲染过程并在必要时恢复，从而提高了交互性能
+在 `React 16` 引入的Fiber架构之后。Fiber使得React能够中断 **渲染** 过程并在必要时恢复，从而提高了交互性能
 
 为了支持这种能力，React需要一种机制来确定哪些更新最重要，应该优先处理
+
+> 所以 `“任务”` 在这里是js单线程(JS引擎线程与UI渲染线程是互斥的)里的渲染概念，那么问题是如何打断正在进行的渲染，而挂起去找其他的渲染任务执行
+>
+> 具体做法是：
+>
+> 将VDOM的执行过程拆分成一个个独立的宏任务，将每个宏任务的执行时间限制在一定范围内，初始为5ms；
+>
+> 即：将一个会造成掉帧的长任务拆解为多个不会掉帧的短宏任务，以减少掉帧的可能性，这一技术被称为时间切片。
 
 > 任务调度: 根据任务的优先级或其他条件来决定哪个任务应该最先被执行
 
@@ -464,3 +472,46 @@ console.log(add(4)); // 返回 8
 
 1. 只关注顶层节点，不关注k(指定参数)
 2. 每次处理后都会移除顶节点，即: 触发最小堆的 `extractMin()`
+
+[万字长文 - 彻底理解react中任务调度和时间分片](https://juejin.cn/post/7371311251434881074)
+
+👇 构造宏任务包裹的任务 `schedulePerformWorkUntilDeadline` 的不同方式(通过新建js的宏任务)
+
+- performWorkUntilDeadline 被包裹的任务
+  - perform 执行
+  - work 任务
+  - until 在...之前
+  - deadline 截止时间
+- schedulePerformWorkUntilDeadline 包裹到宏任务后的任务
+  - shcedule 调度
+  - performWorkUntilDeadline 要求在截止时间前执行的任务
+
+```js
+let schedulePerformWorkUntilDeadline;
+
+if (typeof localSetImmediate === 'function') {
+  // Node.js and 旧版本IE.
+  schedulePerformWorkUntilDeadline = () => {
+    localSetImmediate(performWorkUntilDeadline);
+  };
+} else if (typeof MessageChannel !== 'undefined') {
+  // 浏览器环境
+  const channel = new MessageChannel();
+  const port = channel.port2;
+  // 监听消息
+  channel.port1.onmessage = performWorkUntilDeadline;
+  schedulePerformWorkUntilDeadline = () => {
+    // 发送消息
+    port.postMessage(null);
+  };
+} else {
+  // 低版本浏览器环境
+  schedulePerformWorkUntilDeadline = () => {
+    localSetTimeout(performWorkUntilDeadline, 0);
+  };
+}
+```
+
+我们按照最熟悉的宏任务api：setTimeout来实现
+
+> TODO: 补充：在 vue 源码中也有通过宏任务来实现的任务调度（`nextTick`...）
