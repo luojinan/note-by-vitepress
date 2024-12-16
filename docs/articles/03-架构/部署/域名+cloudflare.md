@@ -31,6 +31,14 @@
 4. 到 github repo setting -> page -> custom domain 填写cloudflare新增的record二级域名，通过 `new_reponame.yourdomain.com` 访问
 5. 注意确保：`yourname.github.io/new_reponame` 和 `new_reponame.yourdomain.com` 都可以访问
 
+## vitepress + github page + cloudflare
+
+vitepress 内置的路由控制在github page 二级路径的使用场景，无法支持`base: './'` 必须设置为 `base: '/reponame/'`
+
+否则虽然部署上去且静态资源路径可以访问，但是点击nav或则sidbar时会嵌套路径导致404
+
+可以把base设置为`/`，来让 cloudflare 域名使用，但是`github page`因为会访问`/reponame/`的静态资源而无法使用（因为base为/后静态资源不会打包到`/reponame/`）
+
 ## cloudflare + 云服务器
 
 <!-- 诉求：我们希望一个前端项目同时可以在 自己的服务器 和 github page 上运行 -->

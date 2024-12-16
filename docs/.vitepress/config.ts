@@ -3,7 +3,7 @@ import { withPwa } from '@vite-pwa/vitepress'
 import { withEasyTheme } from './plugins/vitepress-easy-theme'
 
 export default withPwa(withEasyTheme(defineConfig({
-  base: "./",
+  base: "/",
   title: "罗锦安的blog",
   description: "vue、js、nodejs等等的学习记录",
   ignoreDeadLinks: true,
