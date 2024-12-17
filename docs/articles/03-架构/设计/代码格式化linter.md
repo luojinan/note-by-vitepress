@@ -23,13 +23,15 @@
 
 🤔 不管从中文还是英文的概念上看，都很容易混为一谈，完全可以统一为“语法风格检测”
 
-再加上，本应专注于语法检测的eslint，还具备格式检测，甚至可以 `--fix` 自动修改(格式化)
+再加上，本应专注于语法检测的eslint，还具备格式检测功能，甚至可以 `--fix` 自动修改(格式化)
 
-本应专注于格式检测的prettier，也具备语法检测格式化
+本应专注于格式检测的prettier，也具备语法检测格式化功能
 
 即： 从实操工具上，更加重了 linter 和 formatter 的混乱
 
 ## 编辑器(VSCode) 和 命令行(CI)
+
+> monorepo 项目的VSCode 和 命令行 和 配置文件 共享以及独立运行 也是一个有点复杂的问题 TODO: 😵
 
 我们暂且不论 eslint 和 prettier工具真实的效果，现在假设他们各司其职，eslinter只检测语法，可以通过`--fix`自动修复语法问题，prettier只负责格式化代码风格，两者可以完美配合使用
 
@@ -62,7 +64,7 @@
 
 > 没错 他们是冲突的，我们后面再说
 
-🥳 现在，我们每次保存代码都会触发编辑器的自动格式化，并且会按照每个项目对应的配置规则来进行格式化，只有每个人的编辑器都安装好插件并且配置好编辑器设置(上传到代码仓库)就可以了
+🥳 现在，我们每次保存代码都会触发编辑器的自动格式化，并且会按照每个项目对应的配置规则来进行格式化，只要每个人的编辑器都安装好插件并且配置好编辑器设置(上传到代码仓库)就可以了
 
 但是！这只是 **浅约定** 大家都按照规定的操作来开发和保存触发格式化，并不能真正约束提交到仓库的代码被格式化好或者修复好，如：1.被人本地临时修改规则配置文件来绕过校验提交代码 2. 被用其他编辑器来修改代码从而绕过插件校验 3. 临时关闭插件来绕过插件校验... 4. 某些无法被自动修复的语法，忘记手动修改
 
@@ -106,6 +108,10 @@ TODO: 编辑器插件是否自动格式化是否仍需要项目内安装依赖
 正如上面说的，linter 和 formatter 是可以共存的，但是两者的冲突问题，需要我们自己解决
 
 [处理 ESLint 和 Prettier 冲突](https://ssqdoit.top/daily/2024/ESLint%20+%20Prettierrc%20%E4%BB%A3%E7%A0%81%E8%B4%A8%E9%87%8F%E6%A3%80%E6%9F%A5%E4%B8%8E%E6%A0%BC%E5%BC%8F%E5%8C%96.html#%E5%A4%84%E7%90%86-eslint-%E5%92%8C-prettier-%E5%86%B2%E7%AA%81)
+
+注意现在(2024.5)安装的eslint都是9版本，配置文件可以编写函数，且不再使用`.eslintrc.*`的文件名
+
+> 🤮 而且VSCode的eslint插件没有发布9版本对应的正式版，要手动安装成pre版，否则VSCode无法静态检查(不会显示红色波浪线也不会触发自动保存)
 
 ## antfu（纯 eslint）
 
@@ -223,17 +229,21 @@ npx @eslint/config-inspector
 
 ## Oxlint
 
-## Oxlint + eslint
-
-使用 [unplugin-oxlint](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Ftmg0%2Funplugin-oxlint)
-
-> unplugin 系列的工具，都是为了抹平各种构建工具使用plugin机制的差异，主要方便plugin开发者
+> [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) is designed to catch erroneous or useless code without requiring any configurations by default.
 >
-> 对于使用者来说，如果能自己找到对应的构建工具的插件，就不需要使用 unplugin 系列的插件
+> 旨在捕获错误或无用的代码
 
-注意现在(2024.5)安装的eslint都是9版本，配置文件可以编写函数，且不再使用`.eslintrc.*`的文件名
+从介绍上看，Oxlint是纯净的linter，而不会处理代码风格相关的东西
 
-> 🤮 而且VSCode的eslint插件没有发布9版本对应的正式版，要手动安装成pre版，否则VSCode无法静态检查(不会显示红色波浪线也不会触发自动保存)
+✨ Oxlint 处于逐步支持更多规则的阶段，如果是小项目不太需要太多规则是可以只用Oxlint
+
+> 但是当Oxlint规则不满足大项目需要时，需要结合eslint使用
+>
+> TODO: 似乎也没办法格式化代码风格？
+
+👇 在 vite 小项目中，使用Oxlint且不使用Eslint
+
+使用 oxlint 的 vite plugin： [unplugin-oxlint](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Ftmg0%2Funplugin-oxlint)
 
 👇 `vite.config.js` 使用 `unplugin-oxlint`
 
@@ -241,19 +251,100 @@ npx @eslint/config-inspector
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import Oxlint from 'unplugin-oxlint/vite'
+// or
+// import oxlintPlugin from 'vite-plugin-oxlint'
 
-// <https://vitejs.dev/config/>
 export default defineConfig({
   plugins: [
     vue(),
     Oxlint({
-      includes: ['src/**/*.{ts,vue}'],
+      includes: ['src/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}'],
     }),
+    // or
+    // oxlintPlugin({
+    //   path: 'src'
+    // })
   ],
 })
 ```
 
+> unplugin 系列的工具，都是为了抹平各种构建工具使用plugin机制的差异，主要方便plugin开发者
+>
+> 对于使用者来说，如果能自己找到对应的构建工具的插件，就不需要使用 unplugin 系列的插件，如 [vite-plugin-oxlint](https://www.npmjs.com/package/vite-plugin-oxlint)
+
+👇 nodejs 项目里使用 oxlint 问题
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20241217155503137.png?x-oss-process=image/format,webp)
+
+> 全等校验要配置 oxlint.json 才会生效，并不是默认的零配置
+>
+> `"$schema": "../../node_modules/oxlint/configuration_schema.json",`
+
+并且没有代码风格自动格式化功能，仍然要搭配 prttier 使用，虽然个人项目可以仅靠 VSCode 本地全局配置解决代码风格问题，但是不优雅
+
+综合来说，1. 即使小项目引入也有配置成本 2. 仍然需要搭配 prettier使用
+
+## Oxlint + eslint
+
+> 搭配使用的本质是，先执行oxlint，再执行eslint，并且让后执行的eslint关闭检测oxlint可以检测的规则
+>
+> 因此步骤是 1. 配置运行lint时需要执行2种工具 2. 配置 eslint 规则文件忽略部分规则
+
+当搭配Eslint使用时，因为是用于web项目，在cli工具的帮助下，配置成本很低
+
+在上面 `Oxlint + vite` 的代码里加上 `eslint`
+
+`pnpm add -D eslint vite-plugin-eslint oxlint vite-plugin-oxlint`
+
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import Oxlint from 'unplugin-oxlint/vite'
+// or
+// import oxlintPlugin from 'vite-plugin-oxlint'
+import eslintPlugin from 'vite-plugin-eslint'
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    Oxlint({
+      includes: ['src/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}'],
+    }),
+    // or
+    // oxlintPlugin({
+    //   path: 'src'
+    // })
+    eslintPlugin()
+  ],
+})
+```
+
+运行eslint 之前先运行 oxlint
+
+```json
+{
+  "scripts": {
+    "lint": "oxlint --fix && eslint --fix"
+  }
+}
+```
+
+👇 `pnpm add eslint-plugin-oxlint --D` 配置 `eslint.config.js`
+
+```js
+// eslint.config.js
+import oxlint from 'eslint-plugin-oxlint';
+export default [
+  ...// other eslint plugins
+  oxlint.configs['flat/recommended'], // oxlint should be the last one
+  // 'flat/all'
+];
+```
+
 ## antfu + oxlint
+
+> antfu 的 eslint 依赖，本质是一份eslint规则配置
+
+因此和 Oxlint + eslint类型，antfu + oxlint 只需要在脚手架vite配置好eslint plugin+oxlint plugin后，到eslint config 里设置好oxlint忽略规则就好
 
 [antfu github oxlint](https://github.com/antfu/eslint-config/issues/535#issuecomment-2224527120)
 
@@ -272,6 +363,7 @@ import oxlint from 'eslint-plugin-oxlint'
 export default antfu(
   {},
   oxlint.configs['flat/recommended'], // oxlint should be the last one
+  // 'flat/all'
 )
 ```
 
@@ -285,6 +377,51 @@ export default antfu(
 }
 ```
 
+到目前为止，我们发现想要更好的开发/架构搭建体验，可以选择的方式是 antfu + oxlint 或者 antfu
+
+antfu 可以帮我们省掉 prettier 的配置，而oxlint 可以帮我们加快一点扫描速度，但是oxlint单独使用不具备代码风格格式化功能
+
 ## Biome（Rust版 eslint+prettier）
 
-## Zeroscript
+[Biome](https://biomejs.dev/guides/getting-started/)
+
+```bash
+pnpm add --save-dev @biomejs/biome
+```
+
+```json
+{
+  "scripts": {
+    "format": "biome check --fix --unsafe"
+  }
+}
+```
+
+👆 check 代表同时 linter + formatter，很好的解决了最开始说的两种概念的混乱，同时又提供各自单独的命令 "biome lint" "biome format"
+
+从初始化和配置上看，这是目前最简单的方式，但是需要看他和 eslint + prettier 的兼容情况或者自身的插件生态足够替换 eslint + prettier
+
+但是至少从个人小项目上看，是最优解
+
+[Migrate from ESLint and Prettier](https://biomejs.dev/guides/migrate-eslint-prettier/)
+
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import biomePlugin from 'vite-plugin-biome';
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    biomePlugin({
+       mode: 'check',
+       files: 'src/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}', // default .
+       applyFixes: true // Whether to apply fixes automatically
+     })
+  ],
+})
+```
+
+## VoidZero
+
+[VoidZero](https://voidzero.dev/) 未来应该会把 OXC 打造成类似 Biome 之类的工具来 Rust 化Eslint+Prettier
