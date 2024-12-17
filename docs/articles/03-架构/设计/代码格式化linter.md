@@ -422,6 +422,10 @@ export default defineConfig({
 })
 ```
 
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20241217190415123.png?x-oss-process=image/format,webp)
+
+[npm安装趋势对比](https://npmcharts.com/compare/@biomejs/biome,oxlint,eslint)
+
 ## VoidZero
 
 [VoidZero](https://voidzero.dev/) 未来应该会把 OXC 打造成类似 Biome 之类的工具来 Rust 化Eslint+Prettier
