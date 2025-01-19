@@ -5,6 +5,7 @@
 [冴羽-ts](https://github.com/mqyqingfeng/learn-typescript)
 
 ts 同时具有以下功能：
+
 - 静态类型检查(扫描)
 - 语法降级
 - 编译输出js
@@ -16,6 +17,7 @@ ts 同时具有以下功能：
 而js库开发则可能会使用到 tsc 做转译打包功能(但是 `esbuild` 或其他构建工具 `tsup` 还是比 `tsc` 好用，除非特别简易的库打包可以用 `tsc`)
 
 TS 项目开发中的 一些概念：
+
 - 抹除(`esbuild`、`webpack-loader`) - 无视 `tsconfig` 的编译配置，仅仅把 `TS` 转化为 `JS`，不做任何类型检查、语法降级、注释清除
 - 类型检查(`tsc`、`IDE`) - 根据 `tsconfig` 对 `TS` 做静态语法扫描，不输出JS 文件(`noEmit`)
 - 转译/编译(`tsc`) - 根据 `tsconfig` 把 `TS` 转化为 `JS，包括类型检查并中断报错`
@@ -26,9 +28,26 @@ TS 项目开发中的 一些概念：
 
 👆 和所有涉及编译原理的技术原理相同，如`babel`、`eslint`、`vue->js`
 
+## 再次入门
+
+typescript 本质上还是一个编译工具，发生在编译时，产物仍然是js，因此理解为编译工具而不是语言，会容易理解一点
+
+`typescript = js + 类型 + babel(语法降级功能 + 编译功能)`
+
+在理解为编译工具后，就可以理解为什么有些大项目选择移除ts了，适合的工具才是好工具
+
+而理解为语言，就不好理解为什么不选择更安全的语言来开发大项目了
+
+vscode typescript 配置，在vscode中不需要安装ts插件就可以直接配置，相当于内置了ts插件功能
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20240719231258641.png?x-oss-process=image/format,webp/resize,w_720)
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20240719231357021.png?x-oss-process=image/format,webp/resize,w_720)
+
 ## 学习路线
 
 官方文档比较重要的部分：
+
 - [Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) 是 TS 的基础知识，看完后可以再看看 [Cheat Sheets](https://www.typescriptlang.org/cheatsheets) 中的 Interfaces 和 Types 两张图回顾一下
 - [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) 是 TS 自带的一些工具类型
 - 当你希望扩展第三方库的 TS 定义时，需要用到 [Declaration Merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html)
@@ -42,6 +61,7 @@ TS 项目开发中的 一些概念：
 - IDE执行类型检查，结果输出在代码位置
 
 `typescript` 和 `eslint` 很像，项目需要：
+
 1. 安装依赖
 2. 配置文件
 3. `IDE` 安装 插件
@@ -63,17 +83,16 @@ TS 项目开发中的 一些概念：
 >
 > 也就是 `VSCode` 会识别 `tsconfig` 的 `compilerOptions，但是不识别` `exclude` ？
 
-
 [tsconfig.json 的行为-深入理解 TypeScript](https://jkchao.github.io/typescript-book-chinese/faqs/tsconfig-behavior.html#为什么把一个文件放入「exclude」选项中，它仍然会被编译器选中？) ：被 `import` 的文件，`exclude` 不会生效
 
 👇 ChatGPT：
 
 > `VSCode` 编辑器会使用自己的静态类型检查器来提供编辑器级别的类型分析和自动完成功能
-> 
+>
 > 虽然 `tsc` 不会编译 `exclude` 目录下的文件，但是 `VSCode` 仍然会加载这些文件并对其进行静态类型分析，以提供更好的 `VSCode` 支持和代码提示。这意味着即使你在编译时排除了这些文件， `VSCode` 仍然会检查它们并提供相应的类型检查功能。
- 
+
 > 如果你希望 `VSCode` 完全忽略 `exclude` 目录下的文件，以减少 `VSCode` 的静态类型检查工作量，你可以尝试使用其他插件或配置来实现
-> 
+>
 > 例如，一些 `VSCode` 插件可以根据指定的文件规则或模式来排除特定的文件或目录，这样 `VSCode` 就不会对这些文件进行静态类型检查。你可以在 `VSCode` 的插件市场中搜索相关的插件，并按照插件的说明进行配置
 
 🤔️ 不太确定，也可能是我电脑 `IDE` 的问题，理论上 `VSCode` 会根据 `exclude` 配置忽略类型检查
@@ -83,6 +102,7 @@ TS 项目开发中的 一些概念：
 ### Vite
 
 在基于 `Vite` 的配置中，`开发服务器devServer` 和 `打包器build` 将只会对 `TypeScript` 文件：
+
 - 执行 抹除 (`esbuild`)
 - 而不会执行 类型检查
 
@@ -97,9 +117,9 @@ Vite 之所以不把类型检查作为转换过程的一部分，是因为这两
 > `vue-tsc` 是对 `TypeScript` 自身命令行界面 `tsc` 的一个封装。它的工作方式基本和 `tsc` 一致。即：执行 `TS` 编译(只做类型检查也要执行编译指令`tsc`？)
 
 > 在仅执行 `TS` 抹除的项目中，假如额外开启类型检查：
-> 
+>
 > 开启 `Vite` 开发服务器的同时以侦听模式运行 `vue-tsc`
-> 
+>
 > 或是使用 `vite-plugin-checker` 这样在另一个 `worker` 线程里做静态检查的插件
 
 ## d.ts
@@ -130,6 +150,7 @@ Vite 之所以不把类型检查作为转换过程的一部分，是因为这两
 我们常把自定义`d.ts` 写在项目根目录，或 `typing/` 目录下
 
 一方面是为了方便管理，另一方面是为了避免同名错误如：👇
+
 ```
 /
 ├── src/utils/
@@ -137,9 +158,11 @@ Vite 之所以不把类型检查作为转换过程的一部分，是因为这两
 │   └── index.d.ts
 └── tsconfig.json
 ```
+
 👆 我们把类型写在同级的 `d.ts` 下作为全局类型，不使用 `import` 而是直接使用类型
 
 此时 ts 会帮我们寻找类型，理论上，`d.ts` 定义的是全局的类型，可以直接使用，但是发现不生效：
+
 1. `index.ts` 会从自身寻找类型定义
 2. 往同级目录 `d.ts` 寻找，但是忽略同名 `index.d.ts`
 3. 往上级目录寻找 `d.ts`
