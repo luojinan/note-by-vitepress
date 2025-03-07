@@ -403,7 +403,13 @@ pnpm add --save-dev @biomejs/biome
 
 但是至少从个人小项目上看，是最优解
 
+> 缺点是支持的格式暂时不全，如 html、vue 等
+>
+> 但是 react 的 tsx、ts 都已经完善了
+
 [Migrate from ESLint and Prettier](https://biomejs.dev/guides/migrate-eslint-prettier/)
+
+👇 安装 npm 依赖以实现命令行执行格式化
 
 ```js
 import { defineConfig } from 'vite'
@@ -422,13 +428,13 @@ export default defineConfig({
 })
 ```
 
-vscode setting
+👇 VSCode 自动格式化，通过设置 defaultFormatter 来实现（和 Eslint 使用 codeActionsOnSave 不一样）
 
 ```json
 {
  "editor.formatOnSave": true,
  "editor.formatOnSaveMode": "file",
- "editor.defaultFormatter": "biomejs.biome",
+ "editor.defaultFormatter": "biomejs.biome", // ✨
  "editor.codeActionsOnSave": {
   "quickfix.biome": "explicit",
   "source.organizeImports.biome": "explicit"
