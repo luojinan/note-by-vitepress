@@ -24,7 +24,7 @@ const generrateIndexPage = (id)=>{
     }
     return res
   },[])
-  const IndexPageCompPath = fileURLToPath(new URL('./IndexPage.vue', import.meta.url))
+  const IndexPageCompPath = new URL('./IndexPage.vue', import.meta.url).pathname
   return `
 <script setup>
 import IndexPage from '${IndexPageCompPath}'

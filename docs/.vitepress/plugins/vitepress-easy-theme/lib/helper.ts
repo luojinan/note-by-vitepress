@@ -15,7 +15,7 @@ export const docsPath = pathToFileURL(`${cwd()}/docs/`).href;
 // 获取docs目录的完整名称(从根目录一直到docs目录)
 // const docsDirFullPath = join(__dirname, '../')
 // 获取docs目录的完整长度
-const docsDirFullPathLen = docsPath.length - 7
+const docsDirFullPathLen = docsPath.length - 8
 
 /**
  * 获取dirOrFileFullName中第一个/docs/后的所有内容
