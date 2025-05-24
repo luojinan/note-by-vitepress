@@ -3,7 +3,7 @@ import { join } from 'path'
 import { readdirSync, statSync } from 'fs'
 import { SideBarItem, SidebarGenerateConfig } from './types'
 import { docsPath, getDocsDirNameAfterStr, isMarkdownFile } from './helper'
-
+import { fileURLToPath } from 'url'
 export function getSidebarData(sidebarGenerateConfig: SidebarGenerateConfig = {}) {
   const {
     dirName = 'articles',
@@ -11,7 +11,7 @@ export function getSidebarData(sidebarGenerateConfig: SidebarGenerateConfig = {}
     ignoreDirNames = ['demo', 'asserts'],
   } = sidebarGenerateConfig
   // 获取目录的绝对路径
-  const dirFullPath = new URL(`./${dirName}`,docsPath).pathname
+  const dirFullPath = fileURLToPath(new URL(`./${dirName}`,docsPath))
   // const dirFullPath = resolve(__dirname, `../${dirName}`)
   const allDirAndFileNameArr = readdirSync(dirFullPath)
   const obj = {}

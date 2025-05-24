@@ -4,7 +4,7 @@ import { withEasyTheme } from './plugins/vitepress-easy-theme'
 
 export default withPwa(withEasyTheme(defineConfig({
   base: "/",
-  title: "罗锦安的blog",
+  title: "an blog",
   description: "vue、js、nodejs等等的学习记录",
   ignoreDeadLinks: true,
   themeConfig: {

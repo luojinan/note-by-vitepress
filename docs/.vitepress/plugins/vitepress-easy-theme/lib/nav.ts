@@ -3,6 +3,7 @@ import { readdirSync, statSync } from 'fs'
 import { DefaultTheme } from 'vitepress'
 import { docsPath, getDocsDirNameAfterStr, isMarkdownFile } from './helper'
 import { NavGenerateConfig } from './types'
+import { fileURLToPath } from 'node:url'
 
 /**
  * 获取顶部导航数据
@@ -64,7 +65,7 @@ export function getNavData(navGenerateConfig: NavGenerateConfig) {
   // new URL()
   // console.log(import.meta.url, docsPath)
   // console.log('1111', new URL(`./docs/${dirName}`,docsPath).pathname)
-  const dirFullPath =  new URL(`./${dirName}`,docsPath).pathname
+  const dirFullPath = fileURLToPath(new URL(`./${dirName}`, docsPath))
   // console.log('dirFullPath',dirFullPath)
   const result = getNavDataArr(dirFullPath, 1, maxLevel, enableDirActiveMatch)
   // console.log('navData')

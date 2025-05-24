@@ -1,6 +1,6 @@
 import glob from 'fast-glob'
 import { getRandomEmoji } from './emoji'
-
+import { fileURLToPath } from 'url'
 const generrateIndexPage = (id)=>{
   const [,title] = id.match(/articles\/(.*?)\/index.md/)
 
@@ -24,7 +24,7 @@ const generrateIndexPage = (id)=>{
     }
     return res
   },[])
-  const IndexPageCompPath = new URL('./IndexPage.vue', import.meta.url).pathname
+  const IndexPageCompPath = fileURLToPath(new URL('./IndexPage.vue', import.meta.url))
   return `
 <script setup>
 import IndexPage from '${IndexPageCompPath}'

@@ -1,0 +1,48 @@
+---
+description: AI rules derived by SpecStory from the project AI interaction history
+globs: *
+---
+
+## AI Coding Assistant Rules
+
+## PROJECT DOCUMENTATION & CONTEXT SYSTEM
+
+No specific documentation rules are defined yet.  Add documentation standards as needed.
+
+
+## TECH STACK
+
+*   **Frontend:**  No specific frameworks or libraries are defined yet.
+*   **Backend:** No specific frameworks or libraries are defined yet.
+*   **HTTP Client:** Axios (Consider using in conjunction with TanStack Query for data fetching and state management).
+*   **State Management:** TanStack Query (For managing server-side data states, including caching strategies, invalidation, and retry mechanisms).
+
+
+## CODING STANDARDS
+
+No specific coding standards are defined yet. Add coding style guidelines as needed.
+
+
+## WORKFLOW & RELEASE RULES
+
+No specific workflow or release rules are defined yet. Add workflow and release guidelines as needed.
+
+
+## DEBUGGING
+
+No specific debugging rules are defined yet. Add debugging best practices as needed.
+
+
+## BEST PRACTICES
+
+No specific best practices are defined yet. Add best practices as needed.  Consider adding a best practice regarding the combined use of Axios and TanStack Query for optimal data fetching and state management.
+
+
+## REFERENCES
+
+*   No references are defined yet. Add relevant references as needed.
+
+
+## NEW GUIDELINES FROM USER INTERACTIONS (2024-12-19)
+
+*   **TanStack Query vs. Axios:**  TanStack Query is a data fetching and state management library, while Axios is an HTTP client.  They often work well together; TanStack Query manages the state, and Axios handles the actual HTTP requests.  Consider using this combination for projects requiring efficient data management and state handling.
