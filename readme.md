@@ -1,5 +1,7 @@
 # vitepress文档
 
+test
+
 [homepage -github.io](https://luojinan.github.io/note-by-vitepress/)
 
 ## 本地运行
