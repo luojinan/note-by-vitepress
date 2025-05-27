@@ -1,4 +1,4 @@
-import { sep } from 'path'
+import { normalize } from 'path'
 import { cwd } from 'node:process';
 import { pathToFileURL } from 'node:url';
 /**
@@ -12,23 +12,27 @@ export function isMarkdownFile(fileName: string) {
 
 export const docsPath = pathToFileURL(`${cwd()}/docs/`).href;
 
-// 获取docs目录的完整名称(从根目录一直到docs目录)
-// const docsDirFullPath = join(__dirname, '../')
-// 获取docs目录的完整长度
-const docsDirFullPathLen = docsPath.length - 8
-
 /**
  * 获取dirOrFileFullName中第一个/docs/后的所有内容
- *
+ * 
  * 如:
  * /a-root/docs/test 则 获取到 /test
  * /a-root-docs/docs/test 则 获取到 /test
  * /a-root-docs/docs/docs/test 则 获取到 /docs/test
- *
+ * 
  * @param   {string}  dirOrFileFullName  文件或者目录名
- * @return  {[type]}                     [return description]
+ * @return  {string}                     返回/docs/后的路径，以/开头
  */
 export function getDocsDirNameAfterStr(dirOrFileFullName: string) {
-  // 使用docsDirFullPathLen采用字符串截取的方式，避免多层目录都叫docs的问题
-  return `${sep}${dirOrFileFullName.substring(docsDirFullPathLen)}`
+  // 1. 规范化路径（处理不同操作系统的路径分隔符）
+  const normalizedPath = normalize(dirOrFileFullName).replace(/\\/g, '/');
+  
+  // 2. 查找/docs/的位置
+  const docsIndex = normalizedPath.indexOf('/docs/');
+  if (docsIndex === -1) {
+    return '/';
+  }
+  
+  // 3. 提取/docs/之后的部分（包含开头的/）
+  return normalizedPath.substring(docsIndex + 5);  // 5 是 '/docs/'的长度
 }
