@@ -44,8 +44,10 @@ jobs:
           cache: pnpm
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      - name: Migrate lockfile
+        run: pnpm install --lockfile-only
       - name: Install dependencies
-        run: pnpm i # or pnpm install / yarn install / bun install
+        run: pnpm install --frozen-lockfile
       - name: Build with VitePress
         run: pnpm build # or pnpm docs:build / yarn docs:build / bun run docs:build
       - name: Upload artifact
