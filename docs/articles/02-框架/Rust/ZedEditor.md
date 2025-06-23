@@ -1,27 +1,45 @@
 # Zed Editor
 
-很多内置功能，只装了一个 vue 的 language extensions
+用起来电脑再也没有发烫过，而且多个项目启动关闭非常舒畅，基本不用等各种渲染 loading
 
-其他的就是按照个人习惯，安装了 one Dark Pro 主题插件、VSCode Icon 插件
+虽然精简，但是也有不少内置功能，内置的TS、TSX处理对React开发更友好一点，Vue 要装一个的 language extensions，而且可能不好用
 
-用起来确实没有电脑再也没有发烫过 ...而且多个项目启动关闭非常舒畅
+另外自定义配置，就是按照个人习惯：
 
-## auto formatter
+1. 安装了主题插件 one Dark Pro、VSCode Icon
+2. 自定义快捷键
+3. 自定义右布局
+4. AI 自定义 (没有 Cursor 好用，所以随便配配或者不配...)
 
-[formatter](https://zed.dev/docs/configuring-languages#formatting-and-linting)
-在项目级的 `.zed/settings.json` 配置保存格式化使用 ESLint
+当前文档主要记录一些不好用的地方和折中的解决方法，以及setting
 
-```json
-{
-  "formatter": {
-    "code_actions": {
-      "source.fixAll.eslint": true
-    }
-  }
-}
-```
+和 VSCode 一样分为 global setting，和 project setting，主要记录 auto formatter 设置
 
-## 修改布局位置
+## 缺点
+
+主要是： 1. 插件生态不全 2. 内置功能不完善(如 Git)
+
+> 虽然这里只列出缺点，但是也有不少比 VSCode 更好的交互方式的优点，如：search 的结果可以直接edit，而不用像 VSCode 那样search后open file再search再edit
+
+在社区有人提出并被官方人员关注，应该是时间问题：
+
+1. git diff 没找到左右视图的配置，只能同窗口上下行diff
+2. git history 没找到面板查看分支历史，文件历史，只有line history
+
+- [Add Git Graph (Source Control Graph) #26866](https://github.com/zed-industries/zed/discussions/26866)
+
+3. markdown 插件少，如： preview plugin, pangu plugin, formatter plugin(只有内置的prettier格式化), all in one(数字序列换行自动添加)，而且居然不支持折叠，代码语言是支持的，md链接本地文件也无法跳转
+
+- [Enhance Markdown editing and preview capabilities #30275](https://github.com/zed-industries/zed/discussions/30275)
+
+4. Biome 插件不支持2beta版本(已支持，但是还是不少BUG)，只能在eslint项目里有自定义规则的能力
+5. AI自定义面板交互没有设置openai自定义url，设置默认agent model，设置补全模型，后翻半天文档找到setting.json的配置方式 😤
+
+## 配置
+
+不像VSCode，Zed没有太多可视化的配置，都是打开setting.json来写配置，这似乎只能对着官方文档来写，虽然文档写得很清晰，如果对英语很熟悉一般可以直接search到想要的关键词然后配置好，但这种配置IDE的方式还是很不习惯
+
+### 修改布局位置
 
 文件树、git到右侧，AI到左侧
 
@@ -42,37 +60,23 @@
 }
 ```
 
-## 缺点
-
-在社区有人提出并关注，应该是时间问题：
-
-1. git diff 没找到左右视图的配置，只能显示在diff行下侧
-2. AI 不支持自定义url，用不了自定义服务商的ai，只能使用大厂的ai服务，看起来便宜的只有deepseek
-  - 通过settings.json修改openai的apiurl和modelname实现，缺点没有可视化交互
-3. markdown 插件少，如： preview plugin, pangu plugin, formatter plugin, all in one(数字序列换行自动添加)，而且居然不支持折叠，代码语言是支持的，md链接本地文件也无法跳转
-  - [Enhance Markdown editing and preview capabilities #30275](https://github.com/zed-industries/zed/discussions/30275)
-4. git history 没找到面板查看分支历史，文件历史，只有line history
-  - [Add Git Graph (Source Control Graph) #26866](https://github.com/zed-industries/zed/discussions/26866)
-5. Biome 插件不支持2beta版本，只能在eslint项目里有自定义规则的能力
-
-
-设置openai自定义url，设置默认agent model，设置补全模型(只能选内置的几种)
+### AI setting
 
 ```json
 {
   "language_models": {
-     "openai": {
-       "version": "1",
-       "api_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-       "low_speed_timeout_in_seconds": 600,
-       "available_models": [
-         {
-           "name": "qwen-plus-2025-01-25",
-           "max_tokens": 128000
-         }
-       ]
-     }
-   },
+    "openai": {
+      "version": "1",
+      "api_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "low_speed_timeout_in_seconds": 600,
+      "available_models": [
+        {
+          "name": "qwen-plus-2025-01-25",
+          "max_tokens": 128000
+        }
+      ]
+    }
+  },
   "agent": {
     "default_model": {
       "provider": "openai",
@@ -87,9 +91,49 @@
 }
 ```
 
-## 配置
+### keymap(不在setting.json里)
 
-不像VSCode，Zed没有太多可视化的配置，都是打开setting.json来写配置，这似乎只能对着官方文档来写，虽然文档写得很清晰，如果对英语很熟悉一般可以直接search到想要的关键词然后配置好，但这种配置IDE的方式还是很不习惯
+把 左右布局的快捷键改为和VSCode一致
+
+- cmd-b 在 Zed 中始终打开左侧，而不像VSCode把布局移动到右侧之后，这个快捷键就会打开右侧，因此在修改布局为右侧后，要手动覆盖快捷键
+- cmd-l 在AI时代的VSCode，打开ai工具使用cmd-l，这会覆盖原来的能力，“选中一行”
+- cmd-r 在 Zed 中始终打开右侧，不再使用，但是依旧有效
+
+```json
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      // "shift shift": "file_finder::Toggle"
+      "cmd-l": "workspace::ToggleLeftDock",
+      "cmd-b": "workspace::ToggleRightDock"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      // "j k": ["workspace::SendKeystrokes", "escape"]
+      "cmd-l": "workspace::ToggleLeftDock",
+      "cmd-shift-v": "markdown::OpenPreviewToTheSide"
+    }
+  }
+]
+```
+
+### auto formatter
+
+[formatter](https://zed.dev/docs/configuring-languages#formatting-and-linting)
+在项目级的 `.zed/settings.json` 配置保存格式化使用 ESLint
+
+```json
+{
+  "formatter": {
+    "code_actions": {
+      "source.fixAll.eslint": true
+    }
+  }
+}
+```
 
 [formatter](https://zed.dev/docs/configuring-zed#formatter)
 
@@ -101,7 +145,9 @@
   "formatter": "auto" // 🤔 看不懂这个auto是什么
 }
 ```
+
 从官方文档的4种方式中看: code_actions就是基于 language_server 的
+
 ```json
 {
   // 1.
@@ -120,7 +166,7 @@
   "formatter": {
     "external": {
       "command": "sed",
-      "arguments": ["-e","s/ *$//"]
+      "arguments": ["-e", "s/ *$//"]
     }
   },
   // 4.
@@ -185,6 +231,8 @@ language code_actions 这个配置和 formatter 中的 code_actions 有什么区
 
 ## Biome
 
+使用 Biome 排查过程有点曲折，单独记录
+
 本来配置好了eslint的 formatter 但是在安装了 biome插件之后，静态代码检查和格式化都被biome接管，不管项目级别的 settings code_actions 设置了 eslint
 
 [biome-zed issues](https://github.com/biomejs/biome-zed/issues/97)
@@ -210,17 +258,19 @@ language code_actions 这个配置和 formatter 中的 code_actions 有什么区
 👇 也可以改为由配置文件控制开启，全局禁用，无论项目有没有biome.json，都要在zed/setting.json中开启
 
 编辑器配置
+
 ```json
 {
-  "language_servers": [ "!biome", "..." ]
+  "language_servers": ["!biome", "..."]
 }
 ```
 
 项目级配置
+
 ```json
 // <workspace>/.zed/settings.json
 {
-  "language_servers": [ "biome", "..." ],
+  "language_servers": ["biome", "..."],
 
   "code_actions_on_format": {
     "source.fixAll.biome": true,
@@ -261,7 +311,6 @@ language code_actions 这个配置和 formatter 中的 code_actions 有什么区
 >
 > 👆 ESLint 还提供了特殊的 code_actions 命令给 VSCode 使用，`"source.fixAll.eslint": "explicit"`，用于手动配置，而不是依赖于VSCode 的 `possible`
 
-
 可以知道的是 code_actions 提供了更灵活的配置方式，但是仍然不清楚 formatter 和 code_actions 同时配置的时候的执行机制，以及安装了插件，插件如何影响配置？理想情况是插件不影响配置，必须由用户手动在配置中开启对应的插件，否则安装插件相当于禁用状态
 
 是否需要关闭 editor.formatOnSave 再开启并配置 code_actions
@@ -278,36 +327,9 @@ LSP 是什么？是否意味着不需要安装语言插件就可以直接在支�
 
 [lsp](https://microsoft.github.io/language-server-protocol/)
 
-## keymap
-
-把 左右布局的快捷键改为和VSCode一致
-
-- cmd-b 在 Zed 中始终打开左侧，而不像VSCode把布局移动到右侧之后，这个快捷键就会打开右侧，因此在修改布局为右侧后，要手动覆盖快捷键
-- cmd-l 在AI时代的VSCode，打开ai工具使用cmd-l，这会覆盖原来的能力，“选中一行”
-- cmd-r 在 Zed 中始终打开右侧，不再使用，但是依旧有效
-
-```json
-[
-  {
-    "context": "Workspace",
-    "bindings": {
-      // "shift shift": "file_finder::Toggle"
-      "cmd-l": "workspace::ToggleLeftDock",
-      "cmd-b": "workspace::ToggleRightDock"
-    }
-  },
-  {
-    "context": "Editor",
-    "bindings": {
-      // "j k": ["workspace::SendKeystrokes", "escape"]
-      "cmd-l": "workspace::ToggleLeftDock",
-      "cmd-shift-v": "markdown::OpenPreviewToTheSide"
-    }
-  }
-]
-```
-
 ## 最终的setting
+
+### global settings
 
 最终的setting：包含 1.布局 2.AI 3.主题,缩进风格 4.biome设置
 
@@ -378,6 +400,11 @@ LSP 是什么？是否意味着不需要安装语言插件就可以直接在支�
   "features": {
     "edit_prediction_provider": "copilot"
   },
+  "languages": {
+    "Markdown": {
+      "format_on_save": "on" // 默认不会保存自动格式化 markdown
+    }
+  },
   "lsp": {
     "biome": {
       "settings": {
@@ -388,11 +415,13 @@ LSP 是什么？是否意味着不需要安装语言插件就可以直接在支�
 }
 ```
 
+### project setting
+
 项目级配置
 [biome zed](https://biomejs.dev/reference/zed/)
 
 ```json
-// biome 格式化
+// biome 格式化 要求安装插件和项目依赖
 {
   "tab_size": 2,
   // 👇 不确定是否有效
@@ -405,12 +434,13 @@ LSP 是什么？是否意味着不需要安装语言插件就可以直接在支�
   }
 }
 
-// eslint 格式化
+// eslint 格式化 要求安装项目依赖
 {
+  "tab_size": 2,
   "formatter": {
     "code_actions": {
       "source.fixAll.eslint": true,
-      "source.organizeImports": true
+      "source.organizeImports": false
     }
   }
 }
