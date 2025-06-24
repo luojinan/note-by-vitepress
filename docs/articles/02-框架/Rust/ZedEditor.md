@@ -445,3 +445,21 @@ LSP 是什么？是否意味着不需要安装语言插件就可以直接在支�
   }
 }
 ```
+
+![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20250623141411553.png?x-oss-process=image/format,webp/resize,w_640)
+
+👆 不确定为什么在Vue项目的ts文件里，Biome在做检测，当前项目只开启了Esline， global setting 里设置在仅当项目中存在biome.json才开启lsp
+
+```json
+{
+  "lsp": {
+    "biome": {
+      "settings": {
+        "require_config_file": true
+      }
+    }
+  }
+}
+```
+
+🤔 解决办法是设置 `"language_servers": ["!biome", "..."],`

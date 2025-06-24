@@ -116,7 +116,7 @@ project-memory/
 
 [playground](https://mem0.dev/demo)
 
-[openmemory dashboard](https://app.openmemory.dev/memories?page=1\&size=10)
+[openmemory dashboard](https://app.openmemory.dev/memories?page=1&size=10)
 
 👇 增加记忆
 ![](https://kingan-md-img.oss-cn-guangzhou.aliyuncs.com/blog/20250619152132459.png?x-oss-process=image/format,webp)
